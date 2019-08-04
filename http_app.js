@@ -30,6 +30,8 @@ var MQTT_SUBSCRIPTION_ENABLE = 0;
 
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
+global.my_mission_name = '';
+
 var app = express();
 
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -171,6 +173,21 @@ function retrieve_my_cnt_name(callback) {
             info.parent = '/Mobius/' + drone_info.gcs;
             info.name = 'Drone_Data';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            info.parent = '/Mobius/' + drone_info.gcs;
+            info.name = 'Mission_Data';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            if(drone_info.hasOwnProperty('mission')) {
+                info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
+                info.name = drone_info.mission;
+                conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+                my_mission_name = info.parent + '/' + info.name;
+            }
+            else {
+                my_mission_name = '';
+            }
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data';
             info.name = drone_info.drone;

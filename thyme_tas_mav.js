@@ -22,7 +22,6 @@ exports.socket_arr = socket_arr;
 var tas_buffer = {};
 exports.buffer = tas_buffer;
 
-
 var t_count = 0;
 
 function timer_upload_action() {
@@ -72,6 +71,9 @@ exports.ready = function tas_ready() {
         _server.listen(conf.ae.tas_mav_port, function () {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
         });
+
+        mavPortOpening();
+        ltePortOpening();
     }
 };
 
@@ -99,13 +101,8 @@ exports.noti = function (path_arr, cinObj, socket) {
 };
 
 var SerialPort = require('serialport');
-const Readline = require('@serialport/parser-readline');
-//const Ready = require('@serialport/parser-ready');
-//const Delimiter = require('@serialport/parser-delimiter');
-// const ByteLength = require('@serialport/parser-byte-length');
-// const InterByteTimeout = require('@serialport/parser-inter-byte-timeout');
 
-setInterval(function () {
+function mavPortOpening() {
     if (mavPort == null) {
         mavPort = new SerialPort(conf.serial_list.mav.port, {
             baudRate: parseInt(conf.serial_list.mav.baudrate, 10),
@@ -115,28 +112,6 @@ setInterval(function () {
         mavPort.on('close', mavPortClose);
         mavPort.on('error', mavPortError);
         mavPort.on('data', mavPortData);
-
-        //const parser = mavPort.pipe(new Readline({encoding: 'hex'}));
-        //parser.on('data', mavPortData) // emits data after every '\n'
-
-        // const parser = mavPort.pipe(new Ready({ encoding: 'hex', delimiter: 'fe' }));
-        // parser.on('ready', () => console.log('the ready byte sequence has been received'));
-        // parser.on('data', mavPortData); // all data after READY is received
-
-        // const parser = mavPort.pipe(new ByteLength({length: 8}));
-        // parser.on('data', console.log) // will have 8 bytes per data event
-
-        //const parser = port.pipe(new InterByteTimeout({interval: 3, maxBufferSize: 1}));
-        // const parser = mavPort.pipe(new InterByteTimeout({interval: 3}));
-        // parser.on('data', console.log) // will emit data if there is a pause between packets of at least 30ms
-
-        //const parser = mavPort.pipe(new Delimiter({ delimiter: [0xfe] }));
-        // const parser = mavPort.pipe(new Delimiter({ delimiter: [0xfe] }));
-        // parser.on('data', mavPortData) // emits data after every '\n'
-
-        // const parser = new Readline({encoding: 'hex'});
-        // mavPort.pipe(parser);
-        // parser.on('data', mavPortData);
     }
     else {
         if (mavPort.isOpen) {
@@ -146,7 +121,7 @@ setInterval(function () {
             mavPort.open();
         }
     }
-}, 2000);
+}
 
 function mavPortOpen() {
     console.log('mavPort open. ' + conf.serial_list.mav.port + ' Data rate: ' + mavPort.settings.baudRate);
@@ -154,6 +129,8 @@ function mavPortOpen() {
 
 function mavPortClose() {
     console.log('mavPort closed.');
+
+    mavPortOpening();
 }
 
 function mavPortError(error) {
@@ -165,6 +142,8 @@ function mavPortError(error) {
     else {
         console.log('mavPort error : ' + error);
     }
+
+    setTimeout(mavPortOpening, 2000);
 }
 
 global.mav_ver = 1;
@@ -172,6 +151,7 @@ global.mav_ver = 1;
 var mavStr = [];
 var mavStrPacket = '';
 
+var pre_seq = 0;
 function mavPortData(data) {
     mavStr += data.toString('hex');
 
@@ -199,8 +179,8 @@ function mavPortData(data) {
     }
     mavStrArr.splice(0, 1);
 
-    if(mavStrArr.length >= 1) {
-        console.log(mavStr);
+    //if(mavStrArr.length >= 1) {
+        //console.log(mavStr);
         //console.log(mavStrArr);
         for (var idx in mavStrArr) {
             if(mavStrArr.hasOwnProperty(idx)) {
@@ -212,7 +192,7 @@ function mavPortData(data) {
                 else if(mav_ver == 2) {
                     refLen = (parseInt(mavStrArr[idx].substr(2, 2), 16) + 12) * 2;
                 }
-                //if( mavStrArr[idx].length - 2 <= refLen && refLen <= mavStrArr[idx].length + 2) {
+
                 if(refLen == mavStrArr[idx].length) {
                     mqtt_client.publish(my_cnt_name, new Buffer.from(mavStrArr[idx], 'hex'));
                     mavStrPacket = '';
@@ -221,11 +201,11 @@ function mavPortData(data) {
                 }
                 else if(refLen < mavStrArr[idx].length) {
                     mavStrPacket = '';
-                    console.log('                        ' + mavStrArr[idx]);
+                    //console.log('                        ' + mavStrArr[idx]);
                 }
                 else {
                     mavStrPacket = mavStrArr[idx];
-                    console.log('                ' + mavStrPacket.length + ' - ' + mavStrPacket);
+                    //console.log('                ' + mavStrPacket.length + ' - ' + mavStrPacket);
                 }
             }
         }
@@ -234,15 +214,16 @@ function mavPortData(data) {
             mavStr = mavStrPacket;
             mavStrPacket = '';
         }
-    }
+        else {
+            mavStr = '';
+        }
+    //}
 }
 
 var gpi = {};
 gpi.GLOBAL_POSITION_INT = {};
 
 function parseMav(mavPacket) {
-    console.log('        ' + mavPacket);
-
     var ver = mavPacket.substr(0, 2);
     if (ver == 'fd') {
         var sysid = mavPacket.substr(10, 2).toLowerCase();
@@ -252,6 +233,16 @@ function parseMav(mavPacket) {
         sysid = mavPacket.substr(6, 2).toLowerCase();
         msgid = mavPacket.substr(10, 2).toLowerCase();
     }
+
+    var cur_seq = parseInt(mavPacket.substr(4, 2), 16);
+
+    if(pre_seq == cur_seq) {
+        console.log('        ' + pre_seq + ' - ' + cur_seq + ' - ' + mavPacket);
+    }
+    else {
+        //console.log('        ' + pre_seq + ' - ' + cur_seq + ' - ' + mavPacket;
+    }
+    pre_seq = (cur_seq + 1) % 256;
 
     // if(sysid == '37' ) {
     //     console.log('55 - ' + content_each);
@@ -303,7 +294,9 @@ function parseMav(mavPacket) {
     }
 }
 
-setInterval(function () {
+
+
+function ltePortOpening() {
     if (ltePort == null) {
         ltePort = new SerialPort(conf.serial_list.lte.port, {
             baudRate: parseInt(conf.serial_list.lte.baudrate, 10)
@@ -322,14 +315,18 @@ setInterval(function () {
             ltePort.open();
         }
     }
-}, 2000);
+}
 
 function ltePortOpen() {
     console.log('ltePort open. ' + conf.serial_list.lte.port + ' Data rate: ' + ltePort.settings.baudRate);
+
+    lteReqGetRssi();
 }
 
 function ltePortClose() {
     console.log('ltePort closed.');
+
+    ltePortOpening();
 }
 
 function ltePortError(error) {
@@ -341,66 +338,35 @@ function ltePortError(error) {
     else {
         console.log('[ltePort error]: ' + error);
     }
+
+    setTimeout(ltePortOpening, 2000);
+}
+
+function lteReqGetRssi() {
+    if(ltePort != null) {
+        if (ltePort.isOpen) {
+            var message = new Buffer.from('AT xx');
+
+            ltePort.write(message);
+        }
+    }
 }
 
 var count = 0;
 
 function ltePortData(data) {
-    var val = data.readUInt16LE(0, true);
+    var strRssi = data.toString();
 
-    if (g_sink_buf_start == 0) {
-        if (val == 0x16) {
-            count = 1;
-            g_sink_buf_start = 1;
-            g_sink_ready.push(val);
-        }
-    }
-    else if (g_sink_buf_start == 1) {
-        if (val == 0x05) {
-            count = 2;
-            g_sink_buf_start = 2;
-            g_sink_ready.push(val);
-        }
-    }
-    else if (g_sink_buf_start == 2) {
-        if (val == 0x01) {
-            count = 3;
-            g_sink_buf_start = 3;
-            g_sink_ready.push(val);
-        }
-    }
-    else if (g_sink_buf_start == 3) {
-        count++;
-        g_sink_ready.push(val);
+    gpi.GLOBAL_POSITION_INT.rssi = parseInt(strRssi, 10);
 
-        if (count >= 9) {
-            console.log(g_sink_ready);
+    setTimeout(sendLteRssi, 0, gpi);
+}
 
-            /*CO2 통신 예제
-            SEND(4바이트) : 0x11, 0x01, 0x01, 0xED
-            Respond(8바이트) : 0x16, 0x05, 0x01, 0x02, 0x72, 0x01, 0xD6, 0x99
-            응답의 0x16, 0x05, 0x01 은 항상 같은 값을 가지며, 빨간색 글씨의 0x02, 0x72 가 농도를 나타내는 수치입니다.
-            (HEX) 0x0272 = 626
-            즉, 농도는 626 ppm 입니다. */
+function sendLteRssi(gpi) {
+    if(my_mission_name != '') {
+        var parent = my_mission_name+'?rcn=0';
+        sh_adn.crtci(parent, 0, gpi, null, function () {
 
-            var nValue = g_sink_ready[3] * 256 + g_sink_ready[4];
-
-            console.log(nValue);
-
-            if (tas_state == 'upload') {
-                for (var i = 0; i < upload_arr.length; i++) {
-                    if (upload_arr[i].ctname == 'cnt-co2') {
-                        var cin = {ctname: upload_arr[i].ctname, con: nValue.toString()};
-                        console.log('SEND : ' + JSON.stringify(cin) + ' ---->');
-                        upload_client.write(JSON.stringify(cin) + '<EOF>');
-                        break;
-                    }
-                }
-            }
-
-            g_sink_ready = [];
-            count = 0;
-            g_sink_buf_start = 0;
-        }
+        });
     }
 }
