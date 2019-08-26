@@ -32,7 +32,7 @@ cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'Pandora';
+ae.name         = 'Dione';
 
 ae.id           = 'S'+ae.name;
 
@@ -116,11 +116,11 @@ conf.acp = acp;
 conf.serial_list = {};
 
 conf.serial_list.mav = {};
-conf.serial_list.mav.port = 'COM47';
+conf.serial_list.mav.port = '/dev/serial0';
 conf.serial_list.mav.baudrate = 57600;
 
 conf.serial_list.lte = {};
-conf.serial_list.lte.port = 'COM1';
-conf.serial_list.lte.baudrate = 57600;
+conf.serial_list.lte.port = '/dev/ttyUSB1';
+conf.serial_list.lte.baudrate = 115200;
 
 module.exports = conf;

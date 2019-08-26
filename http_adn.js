@@ -67,7 +67,12 @@ function http_request(origin, path, method, ty, bodyString, callback) {
             }
             else {
                 try {
-                    var jsonObj = JSON.parse(res_body);
+                    if(res_body == '') {
+                        var jsonObj = {};
+                    }
+                    else {
+                        jsonObj = JSON.parse(res_body);
+                    }
                     callback(res, jsonObj);
                 }
                 catch (e) {
@@ -256,6 +261,8 @@ exports.crtci = function(parent, count, content, socket, callback) {
         results_ci['m2m:cin'].con = content;
 
         bodyString = JSON.stringify(results_ci);
+        
+        console.log(bodyString);
     }
 
     http_request(conf.ae.id, parent, 'post', '4', bodyString, function (res, res_body) {

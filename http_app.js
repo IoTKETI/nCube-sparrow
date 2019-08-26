@@ -161,6 +161,7 @@ function create_sub_all(count, callback) {
     }
 }
 
+global.my_parent_cnt_name = '';
 function retrieve_my_cnt_name(callback) {
     sh_adn.rtvct('/Mobius/UTM/approval/'+conf.ae.name+'/la', 0, function (rsc, res_body, count) {
         if(rsc == 2000) {
@@ -178,8 +179,27 @@ function retrieve_my_cnt_name(callback) {
             info.name = 'Mission_Data';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
+            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data';
+            info.name = drone_info.drone;
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
+            info.name = drone_info.sorties;
+            //conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            my_parent_cnt_name = info.parent;
+            my_cnt_name = my_parent_cnt_name;
+            
+            info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
+            info.name = drone_info.drone;
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
+            info.name = drone_info.sorties;
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+            
             if(drone_info.hasOwnProperty('mission')) {
-                info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
+                info.parent = info.parent + '/' + info.name;
                 info.name = drone_info.mission;
                 conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
@@ -188,16 +208,6 @@ function retrieve_my_cnt_name(callback) {
             else {
                 my_mission_name = '';
             }
-
-            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data';
-            info.name = drone_info.drone;
-            conf.cnt.push(JSON.parse(JSON.stringify(info)));
-
-            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
-            info.name = drone_info.sorties;
-            conf.cnt.push(JSON.parse(JSON.stringify(info)));
-
-            my_cnt_name = info.parent + '/' + info.name;
 
             if(drone_info.hasOwnProperty('mav_ver')) {
                 mav_ver = drone_info.mav_ver;
@@ -433,6 +443,8 @@ function mqtt_connect(serverip, noti_topic) {
         // else {
             if(socket_mav) {
                 socket_mav.write(message);
+                
+                tas.send_aggr_to_Mobius(topic, mavStrArr[idx], 1500);
             }
         // }
 

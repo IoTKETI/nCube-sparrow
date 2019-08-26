@@ -45,8 +45,6 @@ function timer_upload_action() {
     }
 }
 
-//wdt.set_wdt(require('shortid').generate(), 5, timer_upload_action);
-
 var _server = null;
 exports.ready = function tas_ready () {
     if(_server == null) {
