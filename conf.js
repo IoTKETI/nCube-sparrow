@@ -32,7 +32,7 @@ cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'Dione';
+ae.name         = 'Tarvos';
 
 ae.id           = 'S'+ae.name;
 
