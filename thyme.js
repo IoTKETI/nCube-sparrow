@@ -27,8 +27,6 @@ global.conf = require('./conf.js');
 //global.sh_state = 'rtvae';
 global.sh_state = 'crtae';
 
-global.wdt = require('./wdt');
-
 global.mqtt_client = null;
 
 // AE core
