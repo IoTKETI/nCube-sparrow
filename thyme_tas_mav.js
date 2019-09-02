@@ -421,13 +421,13 @@ function ltePortData(data) {
                     gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
                 }
                 else if(arrQValue[0] == 'RSRQ') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
+                    gpi.GLOBAL_POSITION_INT.rsrq = parseFloat(arrQValue[1].replace('dbm', ''));
                 }
                 else if(arrQValue[0] == 'RSSI') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
+                    gpi.GLOBAL_POSITION_INT.rssi = parseFloat(arrQValue[1].replace('dbm', ''));
                 }
                 else if(arrQValue[0] == 'SINR') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('db', ''));
+                    gpi.GLOBAL_POSITION_INT.sinr = parseFloat(arrQValue[1].replace('db', ''));
                 }
             }
         }
