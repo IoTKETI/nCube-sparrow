@@ -408,15 +408,14 @@ function ltePortData(data) {
     var arrRssi = strRssi.split('OK');
     
     if(arrRssi.length >= 2) {
-        console.log(arrRssi);
+        //console.log(arrRssi);
 
-        var strLteQ = arrRssi[0];
-
+        var strLteQ = arrRssi[0].replace(/ /g, '');
         var arrLteQ = strLteQ.split(',');
 
         for(var idx in arrLteQ) {
             if(arrLteQ.hasOwnProperty(idx)) {
-                console.log(arrLteQ[idx]);
+                //console.log(arrLteQ[idx]);
                 var arrQValue = arrLteQ[idx].split(':');
                 if(arrQValue[0] == 'RSRP') {
                     gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
