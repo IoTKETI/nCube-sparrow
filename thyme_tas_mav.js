@@ -388,8 +388,8 @@ function ltePortError(error) {
 function lteReqGetRssi() {
     if(ltePort != null) {
         if (ltePort.isOpen) {
-            var message = new Buffer.from('AT+CSQ\r');
-
+            //var message = new Buffer.from('AT+CSQ\r');
+            var message = new Buffer.from('AT@DBG\r');
             ltePort.write(message);
         }
     }
@@ -409,26 +409,47 @@ function ltePortData(data) {
     
     if(arrRssi.length >= 2) {
         console.log(arrRssi);
+
+        var strLteQ = arrRssi[0];
+
+        var arrLteQ = strLteQ.split(',');
+
+        for(var idx in arrLteQ) {
+            if(arrLteQ.hasOwnProperty(idx)) {
+                var arrQValue = arrLteQ[idx].split(':');
+                if(arrQValue[0] == 'RSRP') {
+                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
+                }
+                else if(arrQValue[0] == 'RSRQ') {
+                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
+                }
+                else if(arrQValue[0] == 'RSSI') {
+                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
+                }
+                else if(arrQValue[0] == 'SINR') {
+                    gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('db', ''));
+                }
+            }
+        }
         
-        var rssiVal = parseInt(arrRssi[0].split('+CSQ:')[1].split(',')[0], 10);
-        
-        if(rssiVal == 0) {
-            gpi.GLOBAL_POSITION_INT.rssi = -113;
-        }
-        else if(rssiVal == 31) {
-            gpi.GLOBAL_POSITION_INT.rssi = -51;
-        }
-        else if(rssiVal == 99) {
-            gpi.GLOBAL_POSITION_INT.rssi = 99;
-        }
-        else {
-            gpi.GLOBAL_POSITION_INT.rssi = -113 + (rssiVal * 2);
-        }
+        // var rssiVal = parseInt(arrRssi[0].split('+CSQ:')[1].split(',')[0], 10);
+        //
+        // if(rssiVal == 0) {
+        //     gpi.GLOBAL_POSITION_INT.rssi = -113;
+        // }
+        // else if(rssiVal == 31) {
+        //     gpi.GLOBAL_POSITION_INT.rssi = -51;
+        // }
+        // else if(rssiVal == 99) {
+        //     gpi.GLOBAL_POSITION_INT.rssi = 99;
+        // }
+        // else {
+        //     gpi.GLOBAL_POSITION_INT.rssi = -113 + (rssiVal * 2);
+        // }
         
         //console.log(gpi);
         
         setTimeout(sendLteRssi, 0, gpi);
-        
         
         strRssi = '';
     }
