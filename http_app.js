@@ -28,6 +28,7 @@ var tas = require('./thyme_tas_mav');
 var HTTP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;
 
+global.my_parent_cnt_name = '';
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
 global.my_mission_name = '';
@@ -161,7 +162,6 @@ function create_sub_all(count, callback) {
     }
 }
 
-global.my_parent_cnt_name = '';
 function retrieve_my_cnt_name(callback) {
     sh_adn.rtvct('/Mobius/UTM/approval/'+conf.ae.name+'/la', 0, function (rsc, res_body, count) {
         if(rsc == 2000) {
@@ -184,11 +184,11 @@ function retrieve_my_cnt_name(callback) {
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
-            //info.name = drone_info.sorties;
-            //conf.cnt.push(JSON.parse(JSON.stringify(info)));
+            info.name = 'disarm';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             my_parent_cnt_name = info.parent;
-            my_cnt_name = my_parent_cnt_name;
+            my_cnt_name = my_parent_cnt_name + '/' + info.name;
             
             info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
             info.name = drone_info.drone;

@@ -332,7 +332,7 @@ function parseMav(mavPacket) {
         }
         else {
             flag_base_mode = 0;
-            my_cnt_name = my_parent_cnt_name;
+            my_cnt_name = my_parent_cnt_name + '/' + 'disarm';
         }
                 
         console.log(hb);
