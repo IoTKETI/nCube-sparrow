@@ -467,25 +467,22 @@ function sendLteRssi(gpi) {
 var aggr_content = {};
 
 exports.send_aggr_to_Mobius = function(topic, content_each, gap) {
+    if(aggr_content.hasOwnProperty(topic)) {
+        var timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
+        aggr_content[topic][timestamp] = content_each;
+    }
+    else {
+        aggr_content[topic] = {};
+        timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
+        aggr_content[topic][timestamp] = content_each;
 
-    if(hb.HEARTBEAT.base_mode & 0x80) {
-        if(aggr_content.hasOwnProperty(topic)) {
-            var timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
-            aggr_content[topic][timestamp] = content_each;
-        }
-        else {
-            aggr_content[topic] = {};
-            timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
-            aggr_content[topic][timestamp] = content_each;
-            
-            setTimeout(function () {
-                sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
+        setTimeout(function () {
+            sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
 
-                });
-                
-                delete aggr_content[topic];
-            }, gap, topic);
-        }
+            });
+
+            delete aggr_content[topic];
+        }, gap, topic);
     }
 };
 
