@@ -412,10 +412,11 @@ function ltePortData(data) {
 
         var strLteQ = arrRssi[0];
 
-        var arrLteQ = strLteQ.split(',');
+        var arrLteQ = JSON.stringify(arrRssi[0]);
 
         for(var idx in arrLteQ) {
             if(arrLteQ.hasOwnProperty(idx)) {
+                console.log(arrLteQ[idx]);
                 var arrQValue = arrLteQ[idx].split(':');
                 if(arrQValue[0] == 'RSRP') {
                     gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
