@@ -403,7 +403,7 @@ var strRssi = '';
 function ltePortData(data) {
     strRssi += data.toString();
     
-    console.log(strRssi);
+    //console.log(strRssi);
     
     var arrRssi = strRssi.split('OK');
     
@@ -412,7 +412,7 @@ function ltePortData(data) {
 
         var strLteQ = arrRssi[0];
 
-        var arrLteQ = JSON.stringify(arrRssi[0]);
+        var arrLteQ = strLteQ.split(',');
 
         for(var idx in arrLteQ) {
             if(arrLteQ.hasOwnProperty(idx)) {

@@ -116,7 +116,7 @@ conf.acp = acp;
 conf.serial_list = {};
 
 conf.serial_list.mav = {};
-conf.serial_list.mav.port = '/dev/serial0';
+conf.serial_list.mav.port = '/dev/ttyAMA0';
 conf.serial_list.mav.baudrate = 57600;
 
 conf.serial_list.lte = {};
