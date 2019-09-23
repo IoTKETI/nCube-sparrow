@@ -188,7 +188,7 @@ function retrieve_my_cnt_name(callback) {
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             my_parent_cnt_name = info.parent;
-            my_cnt_name = my_parent_cnt_name + '/' + info.name;
+            //my_cnt_name = my_parent_cnt_name + '/' + info.name;
             
             info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
             info.name = drone_info.drone;
