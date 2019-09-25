@@ -32,6 +32,7 @@ global.my_parent_cnt_name = '';
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
 global.my_mission_name = '';
+global.my_sortie_name = 'disarm';
 
 var app = express();
 
@@ -184,7 +185,7 @@ function retrieve_my_cnt_name(callback) {
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
-            info.name = 'disarm';
+            info.name = my_sortie_name;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             my_parent_cnt_name = info.parent;
@@ -368,7 +369,7 @@ function http_watchdog() {
         }
     }
     else if (sh_state === 'crtci') {
-        //setTimeout(check_rtv_cnt, 10000);
+        setTimeout(check_rtv_cnt, 10000);
     }
 }
 
