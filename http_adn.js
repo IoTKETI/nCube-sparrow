@@ -262,7 +262,7 @@ exports.crtci = function(parent, count, content, socket, callback) {
 
         bodyString = JSON.stringify(results_ci);
         
-        console.log(bodyString);
+        //console.log(bodyString);
     }
 
     http_request(conf.ae.id, parent, 'post', '4', bodyString, function (res, res_body) {
