@@ -312,7 +312,7 @@ function parseMav(mavPacket) {
             mavlink_version = mavPacket.substr(base_offset, 2).toLowerCase();
         }
         
-        console.log(mavPacket);
+        //console.log(mavPacket);
         hb.HEARTBEAT.type = Buffer.from(type, 'hex').readUInt8(0);
         hb.HEARTBEAT.autopilot = Buffer.from(autopilot, 'hex').readUInt8(0);
         hb.HEARTBEAT.base_mode = Buffer.from(base_mode, 'hex').readUInt8(0);
@@ -447,7 +447,7 @@ function ltePortData(data) {
         //     gpi.GLOBAL_POSITION_INT.rssi = -113 + (rssiVal * 2);
         // }
         
-        //console.log(gpi);
+        console.log(gpi);
         
         setTimeout(sendLteRssi, 0, gpi);
         
