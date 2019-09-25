@@ -201,7 +201,11 @@ function retrieve_my_cnt_name(callback) {
             // conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             // default mission
-            lte_mission_name = info.parent = info.parent + '/' + info.name + '/lte';
+            info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
+            info.name = 'LTE';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            lte_mission_name = info.parent + '/' + info.name;
 
             if(drone_info.hasOwnProperty('mission')) {
                 info.parent = info.parent + '/' + info.name;
