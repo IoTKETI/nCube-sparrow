@@ -32,6 +32,7 @@ global.my_parent_cnt_name = '';
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
 global.my_mission_name = '';
+global.lte_mission_name = '';
 global.my_sortie_name = 'disarm';
 
 var app = express();
@@ -198,7 +199,10 @@ function retrieve_my_cnt_name(callback) {
             // info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
             // info.name = drone_info.sorties;
             // conf.cnt.push(JSON.parse(JSON.stringify(info)));
-            
+
+            // default mission
+            lte_mission_name = info.parent = info.parent + '/' + info.name + '/lte';
+
             if(drone_info.hasOwnProperty('mission')) {
                 info.parent = info.parent + '/' + info.name;
                 info.name = drone_info.mission;

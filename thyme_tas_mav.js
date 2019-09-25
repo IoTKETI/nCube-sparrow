@@ -457,12 +457,10 @@ function ltePortData(data) {
 }
 
 function sendLteRssi(gpi) {
-    if(my_mission_name != '') {
-        var parent = my_mission_name+'?rcn=0';
-        sh_adn.crtci(parent, 0, gpi, null, function () {
+    var parent = lte_mission_name+'?rcn=0';
+    sh_adn.crtci(parent, 0, gpi, null, function () {
 
-        });
-    }
+    });
 }
 
 var aggr_content = {};
