@@ -13,6 +13,7 @@
  */
 
 var ip = require("ip");
+var fs = require('fs');
 
 var conf = {};
 var cse = {};
@@ -32,7 +33,16 @@ cse.mqttport    = '1883';
 cse.wsport      = '7577';
 
 // build ae
-ae.name         = 'Dione';
+var ae_name = {};
+try {
+    ae_name = JSON.parse(fs.readFileSync('flight.json', 'utf8'));
+}
+catch (e) {
+    ae_name.flight = 'Dione';
+    fs.writeFileSync('flight.json', JSON.stringify(ae_name, null, 4), 'utf8');
+}
+
+ae.name         = ae_name.flight;
 
 ae.id           = 'S'+ae.name;
 
