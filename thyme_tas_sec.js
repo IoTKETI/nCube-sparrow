@@ -154,6 +154,8 @@ var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
 
+    console.log(secStr);
+
     /*
     if(data[0] == 0xfe || data[0] == 0xfd) {
         var secStrArr = [];
