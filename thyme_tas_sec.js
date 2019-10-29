@@ -125,7 +125,6 @@ function secPortOpening() {
 function secPortOpen() {
     console.log('secPort open. ' + conf.serial_list.sec.port + ' Data rate: ' + secPort.settings.baudRate);
 
-    console.log('Trigger Sec Board');
     triggerSec();
 }
 
@@ -235,17 +234,19 @@ var flag_base_mode = 0;
 function triggerSec() {
     if(secPort != null) {
         if (secPort.isOpen) {
-            const tr_ch = new Uint8Array(5);
+            // const tr_ch = new Uint8Array(5);
+            //
+            // tr_ch[0] = 0x5a;
+            // tr_ch[1] = 0xa5;
+            // tr_ch[2] = 0xf0;
+            // tr_ch[3] = 0x01;
+            // tr_ch[4] = 0x00;
+            //
+            // const message = Buffer.from('5aa5f00000', 'hex');
 
-            tr_ch[0] = 0x5a;
-            tr_ch[1] = 0xa5;
-            tr_ch[2] = 0xf0;
-            tr_ch[3] = 0x00;
-            tr_ch[4] = 0x00;
+            console.log('Trigger Sec Board');
 
-            const message = new Buffer.from(tr_ch.buffer);
-
-            secPort.write(message);
+            secPort.write(Buffer.from('5aa5f00000', 'hex'));
         }
     }
 }
