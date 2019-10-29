@@ -36,6 +36,11 @@ global.my_mission_name = '';
 global.lte_mission_name = '';
 global.my_sortie_name = 'disarm';
 
+global.Req_auth = '';
+global.Res_auth = '';
+global.Result_auth = '';
+global.Certification = '';
+
 var app = express();
 
 //app.use(bodyParser.urlencoded({ extended: true }));
@@ -190,18 +195,22 @@ function retrieve_my_cnt_name(callback) {
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Req_auth';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
+            Req_auth = info.parent + '/' + info.name;
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Res_auth';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
+            Res_auth = info.parent + '/' + info.name;
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Result_auth';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
+            Result_auth = info.parent + '/' + info.name;
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Certification';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
+            Certification = info.parent + '/' + info.name;
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = my_sortie_name;
