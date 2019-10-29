@@ -480,21 +480,6 @@ function ltePortData(data) {
             }
         }
         
-        // var rssiVal = parseInt(arrRssi[0].split('+CSQ:')[1].split(',')[0], 10);
-        //
-        // if(rssiVal == 0) {
-        //     gpi.GLOBAL_POSITION_INT.rssi = -113;
-        // }
-        // else if(rssiVal == 31) {
-        //     gpi.GLOBAL_POSITION_INT.rssi = -51;
-        // }
-        // else if(rssiVal == 99) {
-        //     gpi.GLOBAL_POSITION_INT.rssi = 99;
-        // }
-        // else {
-        //     gpi.GLOBAL_POSITION_INT.rssi = -113 + (rssiVal * 2);
-        // }
-        
         console.log(gpi);
         
         setTimeout(sendLteRssi, 0, gpi);
