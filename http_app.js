@@ -140,15 +140,22 @@ function delete_sub_all(count, callback) {
         callback(2001, count);
     }
     else {
-        var target = conf.sub[count].parent + '/' + conf.sub[count].name;
-        sh_adn.delsub(target, count, function (rsc, res_body, count) {
-            if(rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
-                callback(rsc, count);
-            }
-            else {
-                callback('9999', count);
-            }
-        });
+        if(conf.sub.hasOwnProperty(count)) {
+            var target = conf.sub[count].parent + '/' + conf.sub[count].name;
+            sh_adn.delsub(target, count, function (rsc, res_body, count) {
+                if (rsc == 5106 || rsc == 2002 || rsc == 2000 || rsc == 4105 || rsc == 4004) {
+                    delete_sub_all(++count, function (status, count) {
+                        callback(status, count);
+                    });
+                }
+                else {
+                    callback(9999, count);
+                }
+            });
+        }
+        else {
+            callback(2001, count);
+        }
     }
 }
 
@@ -157,17 +164,24 @@ function create_sub_all(count, callback) {
         callback(2001, count);
     }
     else {
-        var parent = conf.sub[count].parent;
-        var rn = conf.sub[count].name;
-        var nu = conf.sub[count].nu;
-        sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
-            if(rsc == 5106 || rsc == 2001 || rsc == 4105) {
-                callback(rsc, count);
-            }
-            else {
-                callback('9999', count);
-            }
-        });
+        if(conf.sub.hasOwnProperty(count)) {
+            var parent = conf.sub[count].parent;
+            var rn = conf.sub[count].name;
+            var nu = conf.sub[count].nu;
+            sh_adn.crtsub(parent, rn, nu, count, function (rsc, res_body, count) {
+                if (rsc == 5106 || rsc == 2001 || rsc == 4105) {
+                    create_sub_all(++count, function (status, count) {
+                        callback(status, count);
+                    });
+                }
+                else {
+                    callback('9999', count);
+                }
+            });
+        }
+        else {
+            callback(2001, count);
+        }
     }
 }
 
