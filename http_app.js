@@ -51,6 +51,7 @@ var app = express();
 // ?????? ????????.
 var server = null;
 var noti_topic = '';
+var gcs_noti_topic = '';
 
 // ready for mqtt
 for(var i = 0; i < conf.sub.length; i++) {
@@ -87,11 +88,11 @@ function ready_for_notification() {
             if (conf.sub[i].name != null) {
                 if (url.parse(conf.sub[i].nu).protocol === 'mqtt:') {
                     if (url.parse(conf.sub[i]['nu']).hostname === 'autoset') {
-                        conf.sub[i]['nu'] = 'mqtt://' + conf.cse.host + '/' + conf.ae.appid;
-                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.appid);
+                        conf.sub[i]['nu'] = 'mqtt://' + conf.cse.host + '/' + conf.ae.id;
+                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.id);
                     }
                     else if (url.parse(conf.sub[i]['nu']).hostname === conf.cse.host) {
-                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.appid);
+                        noti_topic = util.format('/oneM2M/req/+/%s/#', conf.ae.id);
                     }
                     else {
                         noti_topic = util.format('%s', url.parse(conf.sub[i].nu).pathname);
@@ -99,7 +100,7 @@ function ready_for_notification() {
                 }
             }
         }
-        mqtt_connect(conf.cse.host, noti_topic);
+        mqtt_connect(conf.cse.host, gcs_noti_topic, noti_topic);
     }
 }
 
@@ -191,16 +192,26 @@ function retrieve_my_cnt_name(callback) {
             info.name = drone_info.drone;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
-            // set container for security
+            // set container and subscription for security
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Req_auth';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
             Req_auth = info.parent + '/' + info.name;
 
+            info.parent = Req_auth;
+            info.name = 'sub_auth';
+            info.nu = 'mqtt://' + conf.cse.host + '/Sutm_auth?ct=json';
+            conf.sub.push(JSON.parse(JSON.stringify(info)));
+
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Res_auth';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
             Res_auth = info.parent + '/' + info.name;
+
+            info.parent = Res_auth;
+            info.name = 'sub_auth';
+            info.nu = 'mqtt://' + conf.cse.host + '/' + conf.ae.id + '?ct=json';
+            conf.sub.push(JSON.parse(JSON.stringify(info)));
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = 'Result_auth';
@@ -262,7 +273,7 @@ function retrieve_my_cnt_name(callback) {
             if(pre_my_cnt_name != my_cnt_name) {
                 pre_my_cnt_name = my_cnt_name;
 
-                noti_topic = '/Mobius/' + drone_info.gcs + '/GCS_Data';
+                gcs_noti_topic = '/Mobius/' + drone_info.gcs + '/GCS_Data';
 
                 MQTT_SUBSCRIPTION_ENABLE = 1;
 
@@ -419,7 +430,7 @@ function check_rtv_cnt() {
 global.socket_mav = null;
 global.socket_sec = null;
 
-function mqtt_connect(serverip, noti_topic) {
+function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
     if(mqtt_client == null) {
         if (conf.usesecure === 'disable') {
             var connectOptions = {
@@ -460,6 +471,9 @@ function mqtt_connect(serverip, noti_topic) {
     }
 
     mqtt_client.on('connect', function () {
+        mqtt_client.subscribe(gcs_noti_topic);
+        console.log('[mqtt_connect] gcs_noti_topic : ' + gcs_noti_topic);
+
         mqtt_client.subscribe(noti_topic);
         console.log('[mqtt_connect] noti_topic : ' + noti_topic);
     });
