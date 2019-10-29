@@ -67,12 +67,11 @@ exports.ready = function tas_ready() {
     }
 };
 
-var socket_mav = null;
 function tas_handler(data) {
     socket_mav = this;
     //mqtt_client.publish(my_cnt_name, data);
     
-    _this.send_aggr_to_Mobius(my_cnt_name, data.toString(), 100);
+    send_aggr_to_Mobius(my_cnt_name, data.toString(), 100);
 }
 
 exports.noti = function (path_arr, cinObj, socket) {
@@ -186,7 +185,7 @@ function mavPortData(data) {
 
                 if(refLen == mavPacket.length) {
                     mqtt_client.publish(my_cnt_name, new Buffer.from(mavPacket, 'hex'));
-                    _this.send_aggr_to_Mobius(my_cnt_name, mavPacket, 1500);
+                    send_aggr_to_Mobius(my_cnt_name, mavPacket, 1500);
                     mavStrPacket = '';
 
                     setTimeout(parseMav, 0, mavPacket);
@@ -511,28 +510,6 @@ function sendLteRssi(gpi) {
     });
 }
 
-var aggr_content = {};
-
-exports.send_aggr_to_Mobius = function(topic, content_each, gap) {
-    if(aggr_content.hasOwnProperty(topic)) {
-        var timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
-        aggr_content[topic][timestamp] = content_each;
-    }
-    else {
-        aggr_content[topic] = {};
-        timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
-        aggr_content[topic][timestamp] = content_each;
-
-        setTimeout(function () {
-            sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
-
-            });
-
-            delete aggr_content[topic];
-        }, gap, topic);
-    }
-};
-
 function missionPortOpening() {
     if (missionPort == null) {
         missionPort = new SerialPort(missionPortNum, {
@@ -686,6 +663,6 @@ function parseMission(missionPacket) {
         mission.H2BATTERY.fuelcell2_temp2 = fuelcell2_temp2;
         mission.H2BATTERY.fuelcell2_current = fuelcell2_current;
 
-        _this.send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, JSON.stringify(mission), 1500);
+        send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, JSON.stringify(mission), 1500);
     }
 }

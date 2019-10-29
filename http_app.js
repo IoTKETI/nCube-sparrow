@@ -508,7 +508,7 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
             if(socket_mav) {
                 socket_mav.write(message);
                 
-                tas.send_aggr_to_Mobius(topic, mavStrArr[idx], 1500);
+                //send_aggr_to_Mobius(topic, mavStrArr[idx], 1500);
             }
         // }
 
@@ -530,3 +530,25 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
         console.log(err.message);
     });
 }
+
+var aggr_content = {};
+
+global.send_aggr_to_Mobius = function(topic, content_each, gap) {
+    if(aggr_content.hasOwnProperty(topic)) {
+        var timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
+        aggr_content[topic][timestamp] = content_each;
+    }
+    else {
+        aggr_content[topic] = {};
+        timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
+        aggr_content[topic][timestamp] = content_each;
+
+        setTimeout(function () {
+            sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
+
+            });
+
+            delete aggr_content[topic];
+        }, gap, topic);
+    }
+};

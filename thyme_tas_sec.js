@@ -156,7 +156,7 @@ function secPortData(data) {
 
     console.log(secStr);
 
-    _this.send_aggr_to_Mobius(Req_auth, secStr, 0);
+    send_aggr_to_Mobius(Req_auth, secStr, 0);
 
     /*
     if(data[0] == 0xfe || data[0] == 0xfd) {
@@ -198,7 +198,7 @@ function secPortData(data) {
 
                 if(refLen == secPacket.length) {
                     mqtt_client.publish(my_cnt_name, new Buffer.from(secPacket, 'hex'));
-                    _this.send_aggr_to_Mobius(my_cnt_name, secPacket, 1500);
+                    send_aggr_to_Mobius(my_cnt_name, secPacket, 1500);
                     secStrPacket = '';
 
                     setTimeout(parseSec, 0, secPacket);
