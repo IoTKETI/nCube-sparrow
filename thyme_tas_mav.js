@@ -255,6 +255,21 @@ function parseMav(mavPacket) {
     // }
 
     if (msgid == '21') { // #33
+
+        if (secPort.isOpen) {
+            const tr_ch = new Uint8Array(5);
+
+            tr_ch[0] = 0x5a;
+            tr_ch[1] = 0xa5;
+            tr_ch[2] = 0xf0;
+            tr_ch[3] = 0x00;
+            tr_ch[4] = 0x00;
+
+            const message = new Buffer.from(tr_ch.buffer);
+
+            secPort.write(message);
+        }
+
         if (ver == 'fd') {
             var base_offset = 20;
             var time_boot_ms = mavPacket.substr(base_offset, 8).toLowerCase();

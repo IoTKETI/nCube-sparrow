@@ -25,7 +25,7 @@ exports.buffer = tas_buffer;
 
 var t_count = 0;
 
-var secPort = null;
+global.secPort = null;
 
 exports.ready = function tas_ready() {
     secPortOpening();
@@ -125,6 +125,7 @@ function secPortOpening() {
 function secPortOpen() {
     console.log('secPort open. ' + conf.serial_list.sec.port + ' Data rate: ' + secPort.settings.baudRate);
 
+    console.log('Trigger Sec Board');
     triggerSec();
 }
 
