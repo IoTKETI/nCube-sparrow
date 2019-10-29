@@ -24,6 +24,7 @@ var shortid = require('shortid');
 global.sh_adn = require('./http_adn');
 var noti = require('./noti');
 var tas = require('./thyme_tas_mav');
+var tas_sec = require('./thyme_tas_sec');
 
 var HTTP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;
@@ -412,6 +413,7 @@ function http_watchdog() {
                     ready_for_notification();
 
                     tas.ready();
+                    tas_sec.ready();
 
                     setTimeout(http_watchdog, 100);
 

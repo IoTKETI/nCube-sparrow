@@ -133,4 +133,9 @@ conf.serial_list.lte = {};
 conf.serial_list.lte.port = '/dev/ttyUSB1';
 conf.serial_list.lte.baudrate = 115200;
 
+conf.serial_list.sec = {};
+conf.serial_list.sec.port = '/dev/ttyUSB3';
+conf.serial_list.sec.baudrate = 115200;
+
+
 module.exports = conf;

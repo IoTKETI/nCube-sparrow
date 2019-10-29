@@ -24,55 +24,17 @@ exports.buffer = tas_buffer;
 
 
 var t_count = 0;
-function timer_upload_action() {
-    if (sh_state == 'crtci') {
-        for (var j = 0; j < conf.cnt.length; j++) {
-            if (conf.cnt[j].name == '0.2.481.1.114.IND-0002.23') {
-                var content = JSON.stringify({value: 'TAS' + t_count++});
-                //var content = parseInt(Math.random()*100).toString();
-                console.log('thyme cnt-timer ' + content + ' ---->');
-                var parent = conf.cnt[j].parent + '/' + conf.cnt[j].name;
-                sh_adn.crtci(parent, j, content, this, function (status, res_body, to, socket) {
-                    console.log('x-m2m-rsc : ' + status + ' <----');
-                });
-                break;
-            }
-        }
-        if(t_count >= 3000) {
-            sh_state = 'exit';
-            console.log(sh_state);
-        }
-    }
-}
 
-var _server = null;
-exports.ready = function tas_ready () {
-    if(_server == null) {
-        _server = net.createServer(function (socket) {
-            console.log('socket connected');
-            socket.id = Math.random() * 1000;
-            tas_buffer[socket.id] = '';
-            socket.on('data', tas_handler);
-            socket.on('end', function() {
-                console.log('end');
-            });
-            socket.on('close', function() {
-                console.log('close');
-            });
-            socket.on('error', function(e) {
-                console.log('error ', e);
-            });
-        });
+var secPort = null;
 
-        _server.listen(conf.ae.tas_sec_port, function() {
-            console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
-        });
-    }
+exports.ready = function tas_ready() {
+    secPortOpening();
 };
 
+var socket_sec = null;
 function tas_handler (data) {
     socket_sec = this;
-    mqtt_client.publish(my_cnt_name, data);
+    //mqtt_client.publish(my_cnt_name, data);
     /*
     // 'this' refers to the socket calling this callback.
     tas_buffer[this.id] += data.toString();
@@ -137,58 +99,284 @@ function tas_handler (data) {
     }*/
 }
 
+var SerialPort = require('serialport');
 
-exports.send_tweet = function(cinObj) {
-    var fs = require('fs');
-    var Twitter = require('twitter');
-
-    var twitter_client = new Twitter({
-        consumer_key: 'tV4cipDkQcMzZh8RAWsEToDP2',
-        consumer_secret: '1rAIO5DCuFnRkYVefjst2ULVStBl6Dfucs2AVBjo1pcSx8jROT',
-        access_token_key: '4157451558-lo0rgStwJ3ewEi47TpmrWnoDBPIRB3hcHeNggEk',
-        access_token_secret: 'KlmoKMSvcWPuX1mcmuOd1SIvh8DyLXQD9ja3NeMoVCzdl'
-    });
-
-    var params = {screen_name: 'gbsmfather'};
-    twitter_client.get('statuses/user_timeline', params, function(error, tweets, response){
-        if (!error) {
-            console.log(tweets[0].text);
-        }
-    });
-
-    var cur_d = new Date();
-    var cur_o = cur_d.getTimezoneOffset() / (-60);
-    cur_d.setHours(cur_d.getHours() + cur_o);
-    var cur_time = cur_d.toISOString().replace(/\..+/, '');
-
-    var con_arr = (cinObj.con != null ? cinObj.con : cinObj.content).split(',');
-
-    if (con_arr[con_arr.length-1] != null) {
-        var bitmap = new Buffer(con_arr[con_arr.length-1], 'base64');
-        fs.writeFileSync('decode.jpg', bitmap);
-
-        twitter_client.post('media/upload', {media: bitmap}, function (error, media, response) {
-            if (error) {
-                console.log(error[0].message);
-                return;
-            }
-            // If successful, a media object will be returned.
-            console.log(media);
-
-            // Lets tweet it
-            var status = {
-                status: '[' + cur_time + '] Give me water ! - ',
-                media_ids: media.media_id_string // Pass the media id string
-            };
-
-            twitter_client.post('statuses/update', status, function (error, tweet, response) {
-                if (!error) {
-                    console.log(tweet.text);
-                }
-            });
+function secPortOpening() {
+    if (secPort == null) {
+        secPort = new SerialPort(conf.serial_list.sec.port, {
+            baudRate: parseInt(conf.serial_list.sec.baudrate, 10),
         });
+
+        secPort.on('open', secPortOpen);
+        secPort.on('close', secPortClose);
+        secPort.on('error', secPortError);
+        secPort.on('data', secPortData);
     }
-};
+    else {
+        if (secPort.isOpen) {
+
+        }
+        else {
+            secPort.open();
+        }
+    }
+}
+
+function secPortOpen() {
+    console.log('secPort open. ' + conf.serial_list.sec.port + ' Data rate: ' + secPort.settings.baudRate);
+
+    triggerSec();
+}
+
+function secPortClose() {
+    console.log('secPort closed.');
+
+    secPortOpening();
+}
+
+function secPortError(error) {
+    var error_str = error.toString();
+    console.log('[secPort error]: ' + error.message);
+    if (error_str.substring(0, 14) == "Error: Opening") {
+
+    }
+    else {
+        console.log('secPort error : ' + error);
+    }
+
+    setTimeout(secPortOpening, 2000);
+}
+
+var secStr = [];
+var secStrPacket = '';
+
+var pre_seq = 0;
+function secPortData(data) {
+    secStr += data.toString('hex');
+
+    /*
+    if(data[0] == 0xfe || data[0] == 0xfd) {
+        var secStrArr = [];
+
+        var str = '';
+        var split_idx = 0;
+
+        secStrArr[split_idx] = str;
+        for (var i = 0; i < secStr.length; i+=2) {
+            str = secStr.substr(i, 2);
+
+            if(sec_ver == 1) {
+                if (str == 'fe') {
+                    secStrArr[++split_idx] = '';
+                }
+            }
+            else if(sec_ver == 2) {
+                if (str == 'fd') {
+                    secStrArr[++split_idx] = '';
+                }
+            }
+
+            secStrArr[split_idx] += str;
+        }
+        secStrArr.splice(0, 1);
+
+        var secPacket = '';
+        for (var idx in secStrArr) {
+            if(secStrArr.hasOwnProperty(idx)) {
+                secPacket = secStrPacket + secStrArr[idx];
+
+                if(sec_ver == 1) {
+                    var refLen = (parseInt(secPacket.substr(2, 2), 16) + 8) * 2;
+                }
+                else if(sec_ver == 2) {
+                    refLen = (parseInt(secPacket.substr(2, 2), 16) + 12) * 2;
+                }
+
+                if(refLen == secPacket.length) {
+                    mqtt_client.publish(my_cnt_name, new Buffer.from(secPacket, 'hex'));
+                    _this.send_aggr_to_Mobius(my_cnt_name, secPacket, 1500);
+                    secStrPacket = '';
+
+                    setTimeout(parseSec, 0, secPacket);
+                }
+                else if(refLen < secPacket.length) {
+                    secStrPacket = '';
+                    //console.log('                        ' + secStrArr[idx]);
+                }
+                else {
+                    secStrPacket = secPacket;
+                    //console.log('                ' + secStrPacket.length + ' - ' + secStrPacket);
+                }
+            }
+        }
+
+        if(secStrPacket != '') {
+            secStr = secStrPacket;
+            secStrPacket = '';
+        }
+        else {
+            secStr = '';
+        }
+    }
+    */
+}
+
+var gpi = {};
+gpi.GLOBAL_POSITION_INT = {};
+
+var hb = {};
+hb.HEARTBEAT = {};
+
+var flag_base_mode = 0;
+
+function triggerSec() {
+    if(secPort != null) {
+        if (secPort.isOpen) {
+            const tr_ch = new Uint8Array(5);
+
+            tr_ch[0] = 0x5a;
+            tr_ch[1] = 0xa5;
+            tr_ch[2] = 0xf0;
+            tr_ch[3] = 0x00;
+            tr_ch[4] = 0x00;
+
+            const message = new Buffer.from(tr_ch.buffer);
+
+            secPort.write(message);
+        }
+    }
+}
+
+function parseSec(secPacket) {
+    var ver = secPacket.substr(0, 2);
+    if (ver == 'fd') {
+        var sysid = secPacket.substr(10, 2).toLowerCase();
+        var msgid = secPacket.substr(14, 6).toLowerCase();
+    }
+    else {
+        sysid = secPacket.substr(6, 2).toLowerCase();
+        msgid = secPacket.substr(10, 2).toLowerCase();
+    }
+
+    var cur_seq = parseInt(secPacket.substr(4, 2), 16);
+
+    if(pre_seq == cur_seq) {
+        //console.log('        ' + pre_seq + ' - ' + cur_seq + ' - ' + secPacket);
+    }
+    else {
+        //console.log('        ' + pre_seq + ' - ' + cur_seq + ' - ' + secPacket;
+    }
+    pre_seq = (cur_seq + 1) % 256;
+
+    // if(sysid == '37' ) {
+    //     console.log('55 - ' + content_each);
+    // }
+    // else if(sysid == '0a' ) {
+    //     console.log('10 - ' + content_each);
+    // }
+    // else if(sysid == '21' ) {
+    //     console.log('33 - ' + content_each);
+    // }
+    // else if(sysid == 'ff' ) {
+    //     console.log('255 - ' + content_each);
+    // }
+
+    if (msgid == '21') { // #33
+        if (ver == 'fd') {
+            var base_offset = 20;
+            var time_boot_ms = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            var lat = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            var lon = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            var alt = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            var relative_alt = secPacket.substr(base_offset, 8).toLowerCase();
+        }
+        else {
+            base_offset = 12;
+            time_boot_ms = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            lat = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            lon = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            alt = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            relative_alt = secPacket.substr(base_offset, 8).toLowerCase();
+        }
+
+        gpi.GLOBAL_POSITION_INT.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
+        gpi.GLOBAL_POSITION_INT.lat = Buffer.from(lat, 'hex').readInt32LE(0);
+        gpi.GLOBAL_POSITION_INT.lon = Buffer.from(lon, 'hex').readInt32LE(0);
+        gpi.GLOBAL_POSITION_INT.alt = Buffer.from(alt, 'hex').readInt32LE(0);
+        gpi.GLOBAL_POSITION_INT.relative_alt = Buffer.from(relative_alt, 'hex').readInt32LE(0);
+
+        //console.log(gpi);
+    }
+
+    else if (msgid == '4c') { // #76 : COMMAND_LONG
+
+    }
+
+    else if (msgid == '00') { // #00 : HEARTBEAT
+        if (ver == 'fd') {
+            base_offset = 20;
+            var custom_mode = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            var type = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            var autopilot = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            var base_mode = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            var system_status = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            var seclink_version = secPacket.substr(base_offset, 2).toLowerCase();
+        }
+        else {
+            base_offset = 12;
+            custom_mode = secPacket.substr(base_offset, 8).toLowerCase();
+            base_offset += 8;
+            type = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            autopilot = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            base_mode = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            system_status = secPacket.substr(base_offset, 2).toLowerCase();
+            base_offset += 2;
+            seclink_version = secPacket.substr(base_offset, 2).toLowerCase();
+        }
+
+        //console.log(secPacket);
+        hb.HEARTBEAT.type = Buffer.from(type, 'hex').readUInt8(0);
+        hb.HEARTBEAT.autopilot = Buffer.from(autopilot, 'hex').readUInt8(0);
+        hb.HEARTBEAT.base_mode = Buffer.from(base_mode, 'hex').readUInt8(0);
+        hb.HEARTBEAT.custom_mode = Buffer.from(custom_mode, 'hex').readUInt32LE(0);
+        hb.HEARTBEAT.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
+        hb.HEARTBEAT.seclink_version = Buffer.from(seclink_version, 'hex').readUInt8(0);
+
+        if(hb.HEARTBEAT.base_mode & 0x80) {
+            if(flag_base_mode == 0) {
+                flag_base_mode = 1;
+                my_sortie_name = moment().format('YYYY_MM_DD_T_hh_mm');
+                my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
+
+                sh_adn.crtct(my_parent_cnt_name+'?rcn=0', my_cnt_name, 0, function (rsc, res_body, count) {
+                });
+            }
+        }
+        else {
+            flag_base_mode = 0;
+            my_sortie_name = 'disarm';
+            my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
+        }
+
+        console.log(hb);
+    }
+}
 
 exports.noti = function(path_arr, cinObj, socket) {
     var cin = {};

@@ -33,6 +33,7 @@ var ltePort = null;
 var missionPort = null;
 var missionPortNum = '/dev/ttyUSB3';
 var missionBaudrate = '115200';
+
 exports.ready = function tas_ready() {
     if (_server == null) {
         _server = net.createServer(function (socket) {
@@ -66,6 +67,7 @@ exports.ready = function tas_ready() {
     }
 };
 
+var socket_mav = null;
 function tas_handler(data) {
     socket_mav = this;
     //mqtt_client.publish(my_cnt_name, data);
