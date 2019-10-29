@@ -30,6 +30,9 @@ var _this = this;
 var _server = null;
 global.mavPort = null;
 var ltePort = null;
+var missionPort = null;
+var missionPortNum = '/dev/ttyUSB3';
+var missionBaudrate = '115200';
 exports.ready = function tas_ready() {
     if (_server == null) {
         _server = net.createServer(function (socket) {
@@ -54,6 +57,12 @@ exports.ready = function tas_ready() {
 
         mavPortOpening();
         ltePortOpening();
+
+        if(my_mission_name == 'h2battery') {
+            missionPortNum = '/dev/ttyUSB3';
+            missionBaudrate = '115200';
+            missionPortOpening();
+        }
     }
 };
 
@@ -340,8 +349,6 @@ function parseMav(mavPacket) {
     }
 }
 
-
-
 function ltePortOpening() {
     if (ltePort == null) {
         ltePort = new SerialPort(conf.serial_list.lte.port, {
@@ -509,3 +516,224 @@ exports.send_aggr_to_Mobius = function(topic, content_each, gap) {
     }
 };
 
+function missionPortOpening() {
+    if (missionPort == null) {
+        missionPort = new SerialPort(missionPortNum, {
+            baudRate: parseInt(missionBaudrate, 10),
+        });
+
+        missionPort.on('open', missionPortOpen);
+        missionPort.on('close', missionPortClose);
+        missionPort.on('error', missionPortError);
+        missionPort.on('data', missionPortData);
+    }
+    else {
+        if (missionPort.isOpen) {
+
+        }
+        else {
+            missionPort.open();
+        }
+    }
+}
+
+function missionPortOpen() {
+    console.log('missionPort open. ' + missionPortNum + ' Data rate: ' + missionBaudrate);
+}
+
+function missionPortClose() {
+    console.log('missionPort closed.');
+
+    missionPortOpening();
+}
+
+function missionPortError(error) {
+    var error_str = error.toString();
+    console.log('[missionPort error]: ' + error.message);
+    if (error_str.substring(0, 14) == "Error: Opening") {
+
+    }
+    else {
+        console.log('missionPort error : ' + error);
+    }
+
+    setTimeout(missionPortOpening, 2000);
+}
+
+var missionStr = [];
+var missionStrPacket = '';
+function missionPortData(data) {
+    if(my_mission_name == 'h2battery') {
+        missionStr += data.toString('hex');
+        if(missionStr.length >= 88) {
+            for (var i = 0; i < missionStr.length; i += 2) {
+                if (missionStr.substr(0, 2) == 'fe') {
+                    if (missionStr.substr(86, 2) == 'ff') {
+                        var missionPacket = missionStr.substr(0, 88);
+                        missionStr = missionStr.substr(88);
+
+                        setTimeout(parseMission, 0, missionPacket);
+                    }
+                }
+                else {
+                    missionStr = missionStr.slice(2);
+                    if(missionStr.length >= 88) {
+                        i = 0;
+                    }
+                    else {
+                        break;
+                    }
+                }
+            }
+        }
+
+        // if(missionStr.length >= 88) {
+        //     if (data[0] == 0xfe) {
+        //         var missionStrArr = [];
+        //
+        //         var str = '';
+        //         var split_idx = 0;
+        //
+        //         missionStrArr[split_idx] = str;
+        //         for (i = 0; i < missionStr.length; i += 2) {
+        //             str = missionStr.substr(i, 2);
+        //
+        //             if (mav_ver == 1) {
+        //                 if (str == 'fe') {
+        //                     missionStrArr[++split_idx] = '';
+        //                 }
+        //             }
+        //             else if (mav_ver == 2) {
+        //                 if (str == 'fd') {
+        //                     missionStrArr[++split_idx] = '';
+        //                 }
+        //             }
+        //
+        //             missionStrArr[split_idx] += str;
+        //         }
+        //         missionStrArr.splice(0, 1);
+        //
+        //         var missionPacket = '';
+        //         for (var idx in missionStrArr) {
+        //             if (missionStrArr.hasOwnProperty(idx)) {
+        //                 missionPacket = missionStrPacket + missionStrArr[idx];
+        //
+        //                 if (mav_ver == 1) {
+        //                     var refLen = (parseInt(missionPacket.substr(2, 2), 16) + 8) * 2;
+        //                 }
+        //                 else if (mav_ver == 2) {
+        //                     refLen = (parseInt(missionPacket.substr(2, 2), 16) + 12) * 2;
+        //                 }
+        //
+        //                 if (refLen == missionPacket.length) {
+        //                     _this.send_aggr_to_Mobius(my_mission_parent + '/' + my_cnt_name, missionPacket, 1500);
+        //                     missionStrPacket = '';
+        //
+        //                     setTimeout(parseMission, 0, missionPacket);
+        //                 }
+        //                 else if (refLen < missionPacket.length) {
+        //                     missionStrPacket = '';
+        //                     //console.log('                        ' + mavStrArr[idx]);
+        //                 }
+        //                 else {
+        //                     missionStrPacket = missionPacket;
+        //                     //console.log('                ' + missionStrPacket.length + ' - ' + missionStrPacket);
+        //                 }
+        //             }
+        //         }
+        //
+        //         if (missionStrPacket != '') {
+        //             missionStr = missionStrPacket;
+        //             missionStrPacket = '';
+        //         }
+        //         else {
+        //             missionStr = '';
+        //         }
+        //     }
+        // }
+    }
+}
+
+var mission = {};
+
+function parseMission(missionPacket) {
+    if(my_mission_name == 'h2battery') {
+        mission.H2BATTERY = {};
+
+        var base_offset = 10;
+        var decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var h2 = decimal / 10;
+
+        base_offset = 14;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var output_voltage = decimal / 100;
+
+        base_offset = 18;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var output_current = decimal / 100;
+
+        base_offset = 22;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var battery_voltage = decimal / 100;
+
+        base_offset = 26;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var battery_current = decimal / 100;
+
+        base_offset = 34;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var powerpack_temp = decimal / 10 - 40;
+
+        base_offset = 38;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell1_voltage = decimal / 10;
+
+        base_offset = 42;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell1_temp1 = decimal / 10 - 40;
+
+        base_offset = 46;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell1_temp2 = decimal / 10 - 40;
+
+        base_offset = 50;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell1_current = decimal / 100;
+
+        base_offset = 62;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell2_voltage = decimal / 10;
+
+        base_offset = 66;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell2_temp1 = decimal / 10 - 40;
+
+        base_offset = 70;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell2_temp2 = decimal / 10 - 40;
+
+        base_offset = 74;
+        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+        var fuelcell2_current = decimal / 100;
+
+        //console.log(mavPacket);
+        mission.H2BATTERY.h2 = h2;
+        mission.H2BATTERY.output_voltage = output_voltage;
+        mission.H2BATTERY.output_current = output_current;
+        mission.H2BATTERY.battery_voltage = battery_voltage;
+        mission.H2BATTERY.battery_current = battery_current;
+        mission.H2BATTERY.powerpack_temp = powerpack_temp;
+
+        mission.H2BATTERY.fuelcell1_voltage = fuelcell1_voltage;
+        mission.H2BATTERY.fuelcell1_temp1 = fuelcell1_temp1;
+        mission.H2BATTERY.fuelcell1_temp2 = fuelcell1_temp2;
+        mission.H2BATTERY.fuelcell1_current = fuelcell1_current;
+
+        mission.H2BATTERY.fuelcell2_voltage = fuelcell2_voltage;
+        mission.H2BATTERY.fuelcell2_temp1 = fuelcell2_temp1;
+        mission.H2BATTERY.fuelcell2_temp2 = fuelcell2_temp2;
+        mission.H2BATTERY.fuelcell2_current = fuelcell2_current;
+
+        _this.send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, JSON.stringify(mission), 1500);
+    }
+}

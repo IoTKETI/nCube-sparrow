@@ -31,6 +31,7 @@ var MQTT_SUBSCRIPTION_ENABLE = 0;
 global.my_parent_cnt_name = '';
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
+global.my_mission_parent = '';
 global.my_mission_name = '';
 global.lte_mission_name = '';
 global.my_sortie_name = 'disarm';
@@ -208,13 +209,15 @@ function retrieve_my_cnt_name(callback) {
             lte_mission_name = info.parent + '/' + info.name;
 
             if(drone_info.hasOwnProperty('mission')) {
-                info.parent = info.parent + '/' + info.name;
+                info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
                 info.name = drone_info.mission;
                 conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
-                my_mission_name = info.parent + '/' + info.name;
+                my_mission_parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
+                my_mission_name = drone_info.mission;
             }
             else {
+                my_mission_parent = '';
                 my_mission_name = '';
             }
 
