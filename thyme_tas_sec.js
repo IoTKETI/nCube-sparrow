@@ -154,75 +154,9 @@ var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
 
-    console.log(secStr);
+    console.log('Req_auth - ' + secStr);
 
     send_to_Mobius(Req_auth, secStr, 0);
-
-    /*
-    if(data[0] == 0xfe || data[0] == 0xfd) {
-        var secStrArr = [];
-
-        var str = '';
-        var split_idx = 0;
-
-        secStrArr[split_idx] = str;
-        for (var i = 0; i < secStr.length; i+=2) {
-            str = secStr.substr(i, 2);
-
-            if(sec_ver == 1) {
-                if (str == 'fe') {
-                    secStrArr[++split_idx] = '';
-                }
-            }
-            else if(sec_ver == 2) {
-                if (str == 'fd') {
-                    secStrArr[++split_idx] = '';
-                }
-            }
-
-            secStrArr[split_idx] += str;
-        }
-        secStrArr.splice(0, 1);
-
-        var secPacket = '';
-        for (var idx in secStrArr) {
-            if(secStrArr.hasOwnProperty(idx)) {
-                secPacket = secStrPacket + secStrArr[idx];
-
-                if(sec_ver == 1) {
-                    var refLen = (parseInt(secPacket.substr(2, 2), 16) + 8) * 2;
-                }
-                else if(sec_ver == 2) {
-                    refLen = (parseInt(secPacket.substr(2, 2), 16) + 12) * 2;
-                }
-
-                if(refLen == secPacket.length) {
-                    mqtt_client.publish(my_cnt_name, new Buffer.from(secPacket, 'hex'));
-                    send_aggr_to_Mobius(my_cnt_name, secPacket, 1500);
-                    secStrPacket = '';
-
-                    setTimeout(parseSec, 0, secPacket);
-                }
-                else if(refLen < secPacket.length) {
-                    secStrPacket = '';
-                    //console.log('                        ' + secStrArr[idx]);
-                }
-                else {
-                    secStrPacket = secPacket;
-                    //console.log('                ' + secStrPacket.length + ' - ' + secStrPacket);
-                }
-            }
-        }
-
-        if(secStrPacket != '') {
-            secStr = secStrPacket;
-            secStrPacket = '';
-        }
-        else {
-            secStr = '';
-        }
-    }
-    */
 }
 
 var gpi = {};

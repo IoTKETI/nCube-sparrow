@@ -30,6 +30,7 @@ var tas_sec = require('./thyme_tas_sec');
 var HTTP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;
 
+global.my_gcs_name = '';
 global.my_parent_cnt_name = '';
 global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
@@ -195,6 +196,8 @@ function retrieve_my_cnt_name(callback) {
 
             conf.cnt = [];
 
+            my_gcs_name = drone_info.gcs;
+
             var info = {};
             info.parent = '/Mobius/' + drone_info.gcs;
             info.name = 'Drone_Data';
@@ -289,7 +292,7 @@ function retrieve_my_cnt_name(callback) {
             if(pre_my_cnt_name != my_cnt_name) {
                 pre_my_cnt_name = my_cnt_name;
 
-                gcs_noti_topic = '/Mobius/' + drone_info.gcs + '/GCS_Data';
+                gcs_noti_topic = '/Mobius/' + my_gcs_name + '/GCS_Data';
 
                 MQTT_SUBSCRIPTION_ENABLE = 1;
 
@@ -496,33 +499,28 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
     });
 
     mqtt_client.on('message', function (topic, message) {
-        // if(topic.includes('/oneM2M/req/')) {
-        //     var jsonObj = JSON.parse(message.toString());
-        //
-        //     if (jsonObj['m2m:rqp'] == null) {
-        //         jsonObj['m2m:rqp'] = jsonObj;
-        //     }
-        //
-        //     noti.mqtt_noti_action(topic.split('/'), jsonObj, socket_sec);
-        // }
-        // else {
-            if(socket_mav) {
+        if(topic == gcs_noti_topic) {
+            if (socket_mav) {
                 socket_mav.write(message);
-                
-                //send_aggr_to_Mobius(topic, mavStrArr[idx], 1500);
             }
-        // }
 
-        if(mavPort != null) {
-            if (mavPort.isOpen) {
-                // var arrByte = Array.from(message);
-                //
-                // for (var idx in arrByte) {
-                //     if (arrByte.hasOwnProperty(idx)) {
-                //         mavPort.write(arrByte[idx]);
-                //     }
-                // }
-                mavPort.write(message);
+            if (mavPort != null) {
+                if (mavPort.isOpen) {
+                    mavPort.write(message);
+                }
+            }
+        }
+        else {
+            if(topic.includes('/oneM2M/req/')) {
+                var jsonObj = JSON.parse(message.toString());
+
+                if (jsonObj['m2m:rqp'] == null) {
+                    jsonObj['m2m:rqp'] = jsonObj;
+                }
+
+                noti.mqtt_noti_action(topic.split('/'), jsonObj);
+            }
+            else {
             }
         }
     });

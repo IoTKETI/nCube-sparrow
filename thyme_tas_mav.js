@@ -445,25 +445,25 @@ function ltePortData(data) {
                     gpi.GLOBAL_POSITION_INT.plmn = arrQValue[2];
                 }
                 else if(arrQValue[0] == 'Band') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseInt(arrQValue[1]);
+                    gpi.GLOBAL_POSITION_INT.band = parseInt(arrQValue[1]);
                 }
                 else if(arrQValue[0] == 'EARFCN') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseInt(arrQValue[1]);
+                    gpi.GLOBAL_POSITION_INT.earfcn = parseInt(arrQValue[1]);
                 }
                 else if(arrQValue[0] == 'Bandwidth') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseInt(arrQValue[1].replace('MHz', ''));
+                    gpi.GLOBAL_POSITION_INT.bandwidth = parseInt(arrQValue[1].replace('MHz', ''));
                 }
                 else if(arrQValue[0] == 'PCI') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseInt(arrQValue[1]);
+                    gpi.GLOBAL_POSITION_INT.pci = parseInt(arrQValue[1]);
                 }
                 else if(arrQValue[0] == 'Cell-ID') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = arrQValue[1];
+                    gpi.GLOBAL_POSITION_INT.cell_id = arrQValue[1];
                 }
                 else if(arrQValue[0] == 'GUTI') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = arrQValue[1];
+                    gpi.GLOBAL_POSITION_INT.guti = arrQValue[1];
                 }
                 else if(arrQValue[0] == 'TAC') {
-                    gpi.GLOBAL_POSITION_INT.rsrp = parseInt(arrQValue[1]);
+                    gpi.GLOBAL_POSITION_INT.tac = parseInt(arrQValue[1]);
                 }
                 else if(arrQValue[0] == 'RSRP') {
                     gpi.GLOBAL_POSITION_INT.rsrp = parseFloat(arrQValue[1].replace('dbm', ''));
