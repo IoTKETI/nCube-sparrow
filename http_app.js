@@ -20,6 +20,7 @@ var util = require('util');
 var url = require('url');
 var ip = require('ip');
 var shortid = require('shortid');
+var moment = require('moment');
 
 global.sh_adn = require('./http_adn');
 var noti = require('./noti');
