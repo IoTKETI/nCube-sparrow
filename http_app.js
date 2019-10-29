@@ -553,3 +553,11 @@ global.send_aggr_to_Mobius = function(topic, content_each, gap) {
         }, gap, topic);
     }
 };
+
+global.send_to_Mobius = function(topic, content_each, gap) {
+    setTimeout(function () {
+        sh_adn.crtci(topic+'?rcn=0', 0, content_each, null, function () {
+
+        });
+    }, gap, topic);
+};

@@ -156,7 +156,7 @@ function secPortData(data) {
 
     console.log(secStr);
 
-    send_aggr_to_Mobius(Req_auth, secStr, 0);
+    send_to_Mobius(Req_auth, secStr, 0);
 
     /*
     if(data[0] == 0xfe || data[0] == 0xfd) {
