@@ -31,7 +31,7 @@ var _server = null;
 global.mavPort = null;
 var ltePort = null;
 var missionPort = null;
-var missionPortNum = '/dev/ttyUSB3';
+var missionPortNum = '/dev/ttyUSB5';
 var missionBaudrate = '115200';
 
 exports.ready = function tas_ready() {
