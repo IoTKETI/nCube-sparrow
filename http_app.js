@@ -186,6 +186,23 @@ function retrieve_my_cnt_name(callback) {
             info.name = drone_info.drone;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
+            // set container for security
+            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
+            info.name = 'Req_auth';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
+            info.name = 'Res_auth';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
+            info.name = 'Result_auth';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
+            info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
+            info.name = 'Certification';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
+
             info.parent = '/Mobius/' + drone_info.gcs + '/Drone_Data/' + drone_info.drone;
             info.name = my_sortie_name;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
@@ -196,10 +213,6 @@ function retrieve_my_cnt_name(callback) {
             info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
             info.name = drone_info.drone;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
-
-            // info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
-            // info.name = drone_info.sorties;
-            // conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             // default mission
             info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
