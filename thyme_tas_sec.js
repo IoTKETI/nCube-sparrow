@@ -156,6 +156,8 @@ function secPortData(data) {
 
     console.log(secStr);
 
+    _this.send_aggr_to_Mobius(Req_auth, secStr, 0);
+
     /*
     if(data[0] == 0xfe || data[0] == 0xfd) {
         var secStrArr = [];
@@ -234,18 +236,7 @@ var flag_base_mode = 0;
 function triggerSec() {
     if(secPort != null) {
         if (secPort.isOpen) {
-            // const tr_ch = new Uint8Array(6);
-            //
-            // tr_ch[0] = 0x5a;
-            // tr_ch[1] = 0xa5;
-            // tr_ch[2] = 0xf0;
-            // tr_ch[3] = 0x00;
-            // tr_ch[4] = 0x01;
-            // tr_ch[5] = 0x00;
-            // const message = Buffer.from('5aa5f00000', 'hex');
-
             console.log('Trigger Sec Board');
-
             secPort.write(Buffer.from('5aa5f00001aa', 'hex'));
         }
     }
