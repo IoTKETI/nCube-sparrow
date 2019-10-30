@@ -99,7 +99,7 @@ exports.response_mqtt = function (rsp_topic, rsc, to, fr, rqi, inpc, bodytype) {
     }
 };
 
-exports.mqtt_noti_action = function(topic_arr, jsonObj, socket) {
+exports.mqtt_noti_action = function(topic_arr, jsonObj) {
     if (jsonObj != null) {
         var bodytype = conf.ae.bodytype;
         if(topic_arr[5] != null) {
@@ -136,11 +136,8 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj, socket) {
 
                                 console.log('mqtt response - 2001 ---->');
 
-                                if (path_arr[path_arr.length - 2] === 'cnt-cam') {
-                                    tas_sec.send_tweet(cinObj);
-                                }
-                                else {
-                                    tas_sec.noti(path_arr, cinObj, socket);
+                                if (path_arr[path_arr.length - 2] === 'Res_auth') {
+                                    tas_sec.toSecBoard(cinObj);
                                 }
                                 break;
                             }

@@ -307,20 +307,18 @@ function parseSec(secPacket) {
     }
 }
 
-exports.noti = function(path_arr, cinObj, socket) {
-    var cin = {};
-    cin.ctname = path_arr[path_arr.length-2];
-    cin.con = (cinObj.con != null) ? cinObj.con : cinObj.content;
-
-    if(cin.con == '') {
-        console.log('---- is not cin message');
-    }
-    else {
-        //console.log(JSON.stringify(cin));
-//        console.log(socket_arr);
-//        console.log(path_arr);
-        //console.log('<---- send to tas - ' + cin.con);
-
-        socket.write(JSON.stringify(cin));
+exports.toSecBoard = function(path_arr, cinObj, socket) {
+    if(cinObj.hasOwnProperty('con')) {
+        if(cinObj.con == '') {
+            console.log('---- is not cin message');
+        }
+        else {
+            if(secPort != null) {
+                if (secPort.isOpen) {
+                    console.log('Res_auth to Sec Board');
+                    secPort.write(Buffer.from(cinObj.con, 'hex'));
+                }
+            }
+        }
     }
 };
