@@ -206,6 +206,7 @@ function secPortData(data) {
             if(refLen >= lenCount) {
                 console.log('Req_auth - ' + secPacket);
                 send_to_Mobius(Req_auth, secPacket, 0);
+                secStr = secStr.substr(i+2);
                 start = 0;
             }
         }
