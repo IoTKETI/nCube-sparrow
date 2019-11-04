@@ -176,7 +176,7 @@ function secPortData(data) {
             if(mavStrArr.hasOwnProperty(idx)) {
                 secPacket = secStrPacket + mavStrArr[idx];
 
-                var refLen = (parseInt(secPacket.substr(8, 2), 16) * 256 + parseInt(secPacket.substr(10, 2), 16) + 5) * 2;
+                var refLen = (parseInt(secPacket.substr(6, 2), 16) * 256 + parseInt(secPacket.substr(8, 2), 16) + 5) * 2;
                 console.log(refLen);
 
                 if(refLen == secPacket.length) {
