@@ -203,7 +203,7 @@ function secPortData(data) {
         else if(start == 5) {
             secPacket += str;
             lenCount++;
-            if(refLen > lenCount) {
+            if(refLen <= lenCount) {
                 console.log('Req_auth - ' + secPacket);
                 send_to_Mobius(Req_auth, secPacket, 0);
                 secStr = secStr.substr(i+2);
