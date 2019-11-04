@@ -178,7 +178,7 @@ function secPortData(data) {
                 var refLen = (parseInt(secPacket.substr(8, 2), 16) + 5) * 2;
 
                 if(refLen == secPacket.length) {
-                    console.log('Req_auth - ' + secStr);
+                    console.log('Req_auth - ' + secPacket);
                     send_to_Mobius(Req_auth, secPacket, 0);
                     secStrPacket = '';
                 }
