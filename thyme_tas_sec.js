@@ -157,6 +157,7 @@ function secPortData(data) {
     console.log('Req_auth - ' + secStr);
 
     send_to_Mobius(Req_auth, secStr, 0);
+    secStr = '';
 }
 
 var gpi = {};
