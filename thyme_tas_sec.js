@@ -197,6 +197,7 @@ function secPortData(data) {
             secPacket += str;
 
             refLen = refLen + parseInt(str, 16);
+            console.log(refLen);
             lenCount = 0;
         }
         else if(start == 5) {
