@@ -307,7 +307,7 @@ function parseSec(secPacket) {
     }
 }
 
-exports.toSecBoard = function(path_arr, cinObj, socket) {
+exports.toSecBoard = function(cinObj) {
     if(cinObj.hasOwnProperty('con')) {
         if(cinObj.con == '') {
             console.log('---- is not cin message');
