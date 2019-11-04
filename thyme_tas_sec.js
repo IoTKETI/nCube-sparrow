@@ -154,7 +154,8 @@ var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
 
-    if(data[0] == 0x5a) {
+    console.log(secStr);
+    //if(data[0] == 0x5a) {
         var mavStrArr = [];
 
         var str = '';
@@ -200,7 +201,7 @@ function secPortData(data) {
         else {
             secStr = '';
         }
-    }
+    //}
 }
 
 var gpi = {};
