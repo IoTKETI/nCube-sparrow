@@ -312,6 +312,25 @@ function parseMav(mavPacket) {
     }
     
     else if (msgid == '00') { // #00 : HEARTBEAT
+        if(authResult == 'done') {
+            if (secPort.isOpen) {
+                var len = parseInt(mavPacket.substr(2, 2), 16);
+                const tr_ch = new Uint8Array(5 + len);
+                tr_ch[0] = 0x5a;
+                tr_ch[1] = 0xa5;
+                tr_ch[2] = 0xf7;
+                tr_ch[3] = (len / 256);
+                tr_ch[4] = (len % 256);
+
+                for (var idx = 0; idx < len; idx++) {
+                    tr_ch[5 + idx] = parseInt(mavPacket.substr((10 + idx) * 2, 2), 16);
+                }
+
+                const message = new Buffer.from(tr_ch.buffer);
+                secPort.write(message);
+            }
+        }
+
         if (ver == 'fd') {
             base_offset = 20;
             var custom_mode = mavPacket.substr(base_offset, 8).toLowerCase();
