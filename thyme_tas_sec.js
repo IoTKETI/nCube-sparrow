@@ -155,7 +155,7 @@ function secPortData(data) {
     secStr += data.toString('hex');
 
     console.log(secStr);
-    //if(data[0] == 0x5a) {
+    if(data[0] == 0x5a) {
         var mavStrArr = [];
 
         var str = '';
@@ -176,7 +176,7 @@ function secPortData(data) {
             if(mavStrArr.hasOwnProperty(idx)) {
                 secPacket = secStrPacket + mavStrArr[idx];
 
-                var refLen = (parseInt(secPacket.substr(8, 2), 16) + 5) * 2;
+                var refLen = (parseInt(secPacket.substr(8, 2), 16) * 256 + parseInt(secPacket.substr(10, 2), 16) + 5) * 2;
 
                 if(refLen == secPacket.length) {
                     console.log('Req_auth - ' + secPacket);
@@ -201,7 +201,7 @@ function secPortData(data) {
         else {
             secStr = '';
         }
-    //}
+    }
 }
 
 var gpi = {};
