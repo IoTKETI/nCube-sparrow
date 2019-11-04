@@ -153,7 +153,7 @@ var secStrPacket = '';
 var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
-    console.log(secStr);
+    //console.log(secStr);
 
     var secPacket = '';
     var start  = 0;
@@ -161,7 +161,7 @@ function secPortData(data) {
     var lenCount = 0;
     for (var i = 0; i < secStr.length; i += 2) {
         var str = secStr.substr(i, 2);
-        console.log(str + ' - ' + secPacket);
+        //console.log(str + ' - ' + secPacket);
         if(start == 0) {
             if (str == '5a') {
                 start = 1;
