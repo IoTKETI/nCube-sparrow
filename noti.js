@@ -137,6 +137,7 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj) {
                                 console.log('mqtt response - 2001 ---->');
 
                                 if (path_arr[path_arr.length - 2] === 'Res_auth') {
+                                    console.log(cinObj);
                                     tas_sec.toSecBoard(cinObj);
                                 }
                                 break;
