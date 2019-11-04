@@ -308,21 +308,38 @@ function parseMav(mavPacket) {
     }
     
     else if (msgid == '4c') { // #76 : COMMAND_LONG
-        
+        // if(authResult == 'done') {
+        //     if (secPort.isOpen) {
+        //         len = parseInt(mavPacket.substr(2, 2), 16);
+        //         const tr_ch = new Uint8Array(5 + len);
+        //         tr_ch[0] = 0x5a;
+        //         tr_ch[1] = 0xa5;
+        //         tr_ch[2] = 0xf7;
+        //         tr_ch[3] = (len / 256);
+        //         tr_ch[4] = (len % 256);
+        //
+        //         for (idx = 0; idx < len; idx++) {
+        //             tr_ch[5 + idx] = parseInt(mavPacket.substr((10 + idx) * 2, 2), 16);
+        //         }
+        //
+        //         const message = new Buffer.from(tr_ch.buffer);
+        //         secPort.write(message);
+        //     }
+        // }
     }
     
     else if (msgid == '00') { // #00 : HEARTBEAT
         if(authResult == 'done') {
             if (secPort.isOpen) {
-                var len = parseInt(mavPacket.substr(2, 2), 16);
+                len = parseInt(mavPacket.substr(2, 2), 16);
                 const tr_ch = new Uint8Array(5 + len);
                 tr_ch[0] = 0x5a;
                 tr_ch[1] = 0xa5;
-                tr_ch[2] = 0xf7;
+                tr_ch[2] = 0xf9;
                 tr_ch[3] = (len / 256);
                 tr_ch[4] = (len % 256);
 
-                for (var idx = 0; idx < len; idx++) {
+                for (idx = 0; idx < len; idx++) {
                     tr_ch[5 + idx] = parseInt(mavPacket.substr((10 + idx) * 2, 2), 16);
                 }
 
