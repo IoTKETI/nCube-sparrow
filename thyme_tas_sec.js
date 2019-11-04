@@ -153,54 +153,60 @@ var secStrPacket = '';
 var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
-
     console.log(secStr);
-    if(data[0] == 0x5a) {
-        var mavStrArr = [];
 
-        var str = '';
-        var split_idx = 0;
+    var secPacket = '';
+    var start  = 0;
+    var refLen = 0;
+    var lenCount = 0;
+    for (var i = 0; i < secStr.length; i += 2) {
+        var str = secStr.substr(i, 2);
 
-        mavStrArr[split_idx] = str;
-        for (var i = 0; i < secStr.length; i+=2) {
-            str = secStr.substr(i, 2);
+        if(start == 0) {
             if (str == '5a') {
-                mavStrArr[++split_idx] = '';
+                start = 1;
+                secPacket += str;
             }
-            mavStrArr[split_idx] += str;
-        }
-        mavStrArr.splice(0, 1);
-
-        var secPacket = '';
-        for (var idx in mavStrArr) {
-            if(mavStrArr.hasOwnProperty(idx)) {
-                secPacket = secStrPacket + mavStrArr[idx];
-
-                var refLen = (parseInt(secPacket.substr(6, 2), 16) * 256 + parseInt(secPacket.substr(8, 2), 16) + 5) * 2;
-                console.log(refLen);
-
-                if(refLen == secPacket.length) {
-                    console.log('Req_auth - ' + secPacket);
-                    send_to_Mobius(Req_auth, secPacket, 0);
-                    secStrPacket = '';
-                }
-                else if(refLen < secPacket.length) {
-                    secStrPacket = '';
-                    //console.log('                        ' + mavStrArr[idx]);
-                }
-                else {
-                    secStrPacket = secPacket;
-                    //console.log('                ' + mavStrPacket.length + ' - ' + mavStrPacket);
-                }
+            else {
+                start = 0;
+                secPacket = '';
             }
         }
-
-        if(secStrPacket != '') {
-            secStr = secStrPacket;
-            secStrPacket = '';
+        else if (start == 1) {
+            if (str == 'a5') {
+                start = 2;
+                secPacket += str;
+            }
+            else {
+                start = 0;
+                secPacket = '';
+            }
         }
-        else {
-            secStr = '';
+        else if (start == 2) {
+            start = 3;
+            secPacket += str;
+        }
+        else if(start == 3) {
+            start = 4;
+            secPacket += str;
+
+            refLen = parseInt(str, 16) * 256;
+        }
+        else if(start == 4) {
+            start = 5;
+            secPacket += str;
+
+            refLen = refLen + parseInt(str, 16);
+            lenCount = 0;
+        }
+        else if(start == 5) {
+            secPacket += str;
+            lenCount++;
+            if(refLen >= lenCount) {
+                console.log('Req_auth - ' + secPacket);
+                send_to_Mobius(Req_auth, secPacket, 0);
+                start = 0;
+            }
         }
     }
 }
