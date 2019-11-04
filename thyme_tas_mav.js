@@ -269,7 +269,6 @@ function parseMav(mavPacket) {
                 }
 
                 const message = new Buffer.from(tr_ch.buffer);
-
                 secPort.write(message);
             }
         }

@@ -154,10 +154,57 @@ var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
 
-    console.log('Req_auth - ' + secStr);
+    if(data[0] == 0x5a) {
+        var mavStrArr = [];
 
-    send_to_Mobius(Req_auth, secStr, 0);
-    secStr = '';
+        var str = '';
+        var split_idx = 0;
+
+        mavStrArr[split_idx] = str;
+        for (var i = 0; i < secStr.length; i+=2) {
+            str = secStr.substr(i, 2);
+            if (str == '5a') {
+                mavStrArr[++split_idx] = '';
+            }
+            mavStrArr[split_idx] += str;
+        }
+        mavStrArr.splice(0, 1);
+
+        var secPacket = '';
+        for (var idx in mavStrArr) {
+            if(mavStrArr.hasOwnProperty(idx)) {
+                secPacket = secStrPacket + mavStrArr[idx];
+
+                var refLen = (parseInt(secPacket.substr(8, 2), 16) + 5) * 2;
+
+                if(refLen == secPacket.length) {
+                    console.log('Req_auth - ' + secStr);
+                    send_to_Mobius(Req_auth, secPacket, 0);
+                    secStr = '';
+
+                    mqtt_client.publish(my_cnt_name, new Buffer.from(secPacket, 'hex'));
+                    send_aggr_to_Mobius(my_cnt_name, secPacket, 1500);
+                    secStrPacket = '';
+                }
+                else if(refLen < secPacket.length) {
+                    secStrPacket = '';
+                    //console.log('                        ' + mavStrArr[idx]);
+                }
+                else {
+                    secStrPacket = secPacket;
+                    //console.log('                ' + mavStrPacket.length + ' - ' + mavStrPacket);
+                }
+            }
+        }
+
+        if(secStrPacket != '') {
+            secStr = mavStrPacket;
+            secStrPacket = '';
+        }
+        else {
+            secStr = '';
+        }
+    }
 }
 
 var gpi = {};
