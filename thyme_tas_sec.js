@@ -202,6 +202,7 @@ function secPortData(data) {
         }
         else if(start == 5) {
             secPacket += str;
+            console.log(str + ' - ' + secPacket);
             lenCount++;
             if(refLen >= lenCount) {
                 console.log('Req_auth - ' + secPacket);
