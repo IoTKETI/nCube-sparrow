@@ -365,7 +365,7 @@ function parseMav(mavPacket) {
             my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
         }
                 
-        console.log(hb);
+        //console.log(hb);
     }
 }
 
@@ -484,7 +484,7 @@ function ltePortData(data) {
             }
         }
         
-        console.log(gpi);
+        //console.log(gpi);
         
         setTimeout(sendLteRssi, 0, gpi);
         
