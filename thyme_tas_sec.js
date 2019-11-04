@@ -314,10 +314,15 @@ exports.toSecBoard = function(cinObj) {
             console.log('---- is not cin message');
         }
         else {
-            if(secPort != null) {
-                if (secPort.isOpen) {
-                    console.log('Res_auth to Sec Board');
-                    secPort.write(Buffer.from(cinObj.con, 'hex'));
+            if(cinObj.con == 'done') {
+                authResult = 'done';
+            }
+            else {
+                if(secPort != null) {
+                    if (secPort.isOpen) {
+                        console.log('Res_auth to Sec Board');
+                        secPort.write(Buffer.from(cinObj.con, 'hex'));
+                    }
                 }
             }
         }

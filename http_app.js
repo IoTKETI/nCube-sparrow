@@ -44,6 +44,9 @@ global.Res_auth = '';
 global.Result_auth = '';
 global.Certification = '';
 
+
+global.authResult = 'yet';
+
 var app = express();
 
 //app.use(bodyParser.urlencoded({ extended: true }));
