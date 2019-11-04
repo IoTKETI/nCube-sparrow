@@ -261,8 +261,8 @@ function parseMav(mavPacket) {
                 tr_ch[0] = 0x5a;
                 tr_ch[1] = 0xa5;
                 tr_ch[2] = 0xf7;
-                tr_ch[3] = 0x00;
-                tr_ch[4] = len;
+                tr_ch[3] = (len / 256);
+                tr_ch[4] = (len % 256);
 
                 for (var idx = 0; idx < len; idx++) {
                     tr_ch[5 + idx] = parseInt(mavPacket.substr((10 + idx) * 2, 2), 16);
