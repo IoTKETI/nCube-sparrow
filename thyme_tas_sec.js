@@ -161,7 +161,7 @@ function secPortData(data) {
     var lenCount = 0;
     for (var i = 0; i < secStr.length; i += 2) {
         var str = secStr.substr(i, 2);
-
+        console.log(str + ' - ' + secPacket);
         if(start == 0) {
             if (str == '5a') {
                 start = 1;
@@ -202,7 +202,6 @@ function secPortData(data) {
         }
         else if(start == 5) {
             secPacket += str;
-            console.log(str + ' - ' + secPacket);
             lenCount++;
             if(refLen >= lenCount) {
                 console.log('Req_auth - ' + secPacket);
