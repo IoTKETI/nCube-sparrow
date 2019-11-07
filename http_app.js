@@ -364,6 +364,7 @@ function http_watchdog() {
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
+                setTimeout(http_watchdog, 1000);
             }
         });
     }
@@ -375,21 +376,29 @@ function http_watchdog() {
     else if (sh_state === 'crtct') {
         console.log('[sh_state] : ' + sh_state);
         create_cnt_all(request_count, function (status, count) {
-            request_count = ++count;
-            return_count = 0;
-            if (conf.cnt.length <= count) {
-                sh_state = 'delsub';
-                request_count = 0;
+            if(status == 9999) {
+                setTimeout(http_watchdog, 1000);
+            }
+            else {
+                request_count = ++count;
                 return_count = 0;
+                if (conf.cnt.length <= count) {
+                    sh_state = 'delsub';
+                    request_count = 0;
+                    return_count = 0;
 
-                setTimeout(http_watchdog, 100);
+                    setTimeout(http_watchdog, 100);
+                }
             }
         });
     }
     else if (sh_state === 'delsub') {
         console.log('[sh_state] : ' + sh_state);
-        if(return_count == 0) {
-            delete_sub_all(request_count, function (status, count) {
+        delete_sub_all(request_count, function (status, count) {
+            if(status == 9999) {
+                setTimeout(http_watchdog, 1000);
+            }
+            else {
                 request_count = ++count;
                 return_count = 0;
                 if (conf.sub.length <= count) {
@@ -399,19 +408,16 @@ function http_watchdog() {
 
                     setTimeout(http_watchdog, 100);
                 }
-            });
-        }
-        else {
-            return_count++;
-            if (return_count >= 3) {
-                return_count = 0;
             }
-        }
+        });
     }
     else if (sh_state === 'crtsub') {
         console.log('[sh_state] : ' + sh_state);
-        if(return_count == 0) {
-            create_sub_all(request_count, function (status, count) {
+        create_sub_all(request_count, function (status, count) {
+            if(status == 9999) {
+                setTimeout(http_watchdog, 1000);
+            }
+            else {
                 request_count = ++count;
                 return_count = 0;
                 if (conf.sub.length <= count) {
@@ -423,17 +429,9 @@ function http_watchdog() {
                     tas_sec.ready();
 
                     setTimeout(http_watchdog, 100);
-
-                    // var _ae = {};
-                    // _ae.id = conf.ae.id;
-                    // fs.writeFileSync('aei.json', JSON.stringify(_ae, null, 4), 'utf8');
                 }
-            });
-        }
-        return_count++;
-        if(return_count >= 3) {
-            return_count = 0;
-        }
+            }
+        });
     }
     else if (sh_state === 'crtci') {
         setTimeout(check_rtv_cnt, 10000);
