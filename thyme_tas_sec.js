@@ -168,6 +168,8 @@ function secPortData(data) {
                 secPacket += str;
             }
             else {
+                secStr = secStr.substr(i+2);
+                i = -2;
                 start = 0;
                 secPacket = '';
             }
@@ -207,6 +209,7 @@ function secPortData(data) {
                 console.log('Req_auth - ' + secPacket);
                 send_to_Mobius(Req_auth, secPacket, 0);
                 secStr = secStr.substr(i+2);
+                i = -2;
                 start = 0;
             }
         }

@@ -584,23 +584,41 @@ var missionStrPacket = '';
 function missionPortData(data) {
     if(my_mission_name == 'h2battery') {
         missionStr += data.toString('hex');
-        if(missionStr.length >= 88) {
-            for (var i = 0; i < missionStr.length; i += 2) {
-                if (missionStr.substr(0, 2) == 'fe') {
-                    if (missionStr.substr(86, 2) == 'ff') {
-                        var missionPacket = missionStr.substr(0, 88);
-                        missionStr = missionStr.substr(88);
 
-                        setTimeout(parseMission, 0, missionPacket);
-                    }
-                }
-                else {
-                    missionStr = missionStr.slice(2);
-                    if(missionStr.length >= 88) {
-                        i = 0;
+        if(missionStr.length >= 88) {
+            var missionPacket = '';
+            var start = 0;
+            var refLen = 0;
+            var lenCount = 0;
+            for (var i = 0; i < missionStr.length; i += 2) {
+                var str = missionStr.substr(i, 2);
+                //console.log(str + ' - ' + secPacket);
+                if (start == 0) {
+                    if (str == 'fe') {
+                        start = 1;
+                        missionPacket += str;
+                        lenCount++;
                     }
                     else {
-                        break;
+                        start = 0;
+                        missionPacket = '';
+                        lenCount = 0;
+                        missionStr = missionStr.substr(i + 2);
+                        i = -2;
+                        if (missionStr.length >= 88) {
+                            break;
+                        }
+                    }
+                }
+                else if (start == 1) {
+                    missionPacket += str;
+                    lenCount++;
+                    if (44 <= lenCount) {
+                        console.log('Parse Mission  - ' + missionPacket);
+                        setTimeout(parseMission, 0, missionPacket);
+                        missionStr = missionStr.substr(i + 2);
+                        i = -2;
+                        start = 0;
                     }
                 }
             }
