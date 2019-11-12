@@ -71,7 +71,7 @@ function tas_handler(data) {
     socket_mav = this;
     //mqtt_client.publish(my_cnt_name, data);
     
-    send_aggr_to_Mobius(my_cnt_name, data.toString(), 100);
+    //send_aggr_to_Mobius(my_cnt_name, data.toString(), 100);
 }
 
 exports.noti = function (path_arr, cinObj, socket) {

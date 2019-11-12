@@ -249,6 +249,10 @@ function retrieve_my_cnt_name(callback) {
             info.name = my_sortie_name;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
+            sh_adn.delae(info.parent + '/' + info.name, function () {
+                console.log('delete container named disarm')
+            });
+
             my_parent_cnt_name = info.parent;
             my_cnt_name = my_parent_cnt_name + '/' + info.name;
             
@@ -434,7 +438,7 @@ function http_watchdog() {
         });
     }
     else if (sh_state === 'crtci') {
-        setTimeout(check_rtv_cnt, 10000);
+        //setTimeout(check_rtv_cnt, 10000);
     }
 }
 
