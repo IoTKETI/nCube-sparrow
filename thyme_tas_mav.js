@@ -196,54 +196,62 @@ function tas_handler(data) {
     params.target_system = 0;
     params.target_component = 0;
     sendDroneMessage(mavlink.MAVLINK_MSG_ID_PING, params, function () {
-        // #1 HEARTBEAT
-        params.type = 2;
-        params.autopilot = 3;
-        params.base_mode = 81;
-        params.system_status = 4;
-        params.mavlink_version = 3;
-        sendDroneMessage(mavlink.MAVLINK_MSG_ID_HEARTBEAT, params, function () {
-            // #2 MAVLINK_MSG_ID_GPS_RAW_INT
-            params.time_usec = 0;
-            params.fix_type = 3;
-            params.lat = dji.lat * 1E7;
-            params.lon = dji.lon * 1E7;
-            params.alt = dji.alt;
-            params.eph = 175;
-            params.epv = 270;
-            params.vel = 7;
-            params.cog = 0;
-            params.satellites_visible = 7;
-            params.alt_ellipsoid = 0;
-            params.h_acc = 0;
-            params.v_acc = 0;
-            params.vel_acc = 0;
-            params.hdg_acc = 0;
-            sendDroneMessage(mavlink.MAVLINK_MSG_ID_GPS_RAW_INT, params, function () {
-                // #3 MAVLINK_MSG_ID_ATTITUDE
-                params.time_boot_ms = dji.timestamp;
-                params.roll = dji.roll;
-                params.pitch = dji.pitch;
-                params.yaw = dji.yaw;
-                params.rollspeed = -0.00011268721573287621;
-                params.pitchspeed = 0.0000612109579378739;
-                params.yawspeed = -0.00031687552109360695;
-                sendDroneMessage(mavlink.MAVLINK_MSG_ID_ATTITUDE, params, function () {
-                    // #4 MAVLINK_MSG_ID_GLOBAL_POSITION_INT
-                    params.time_boot_ms = dji.timestamp;
-                    params.lat = dji.lat * 1E7;
-                    params.lon = dji.lon * 1E7;
-                    params.alt = dji.alt;
-                    params.relative_alt = dji.relative_alt;
-                    params.vx = dji.vx;
-                    params.vy = dji.vy;
-                    params.vz = dji.vz;
-                    params.hdg = 0;
-                    sendDroneMessage(mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params, function () {
-                    });
-                });
-            });
-        });
+
+    });
+
+    // #1 HEARTBEAT
+    params.type = 2;
+    params.autopilot = 3;
+    params.base_mode = 81;
+    params.system_status = 4;
+    params.mavlink_version = 3;
+    sendDroneMessage(mavlink.MAVLINK_MSG_ID_HEARTBEAT, params, function () {
+
+    });
+
+    // #2 MAVLINK_MSG_ID_GPS_RAW_INT
+    params.time_usec = 0;
+    params.fix_type = 3;
+    params.lat = dji.lat * 1E7;
+    params.lon = dji.lon * 1E7;
+    params.alt = dji.alt;
+    params.eph = 175;
+    params.epv = 270;
+    params.vel = 7;
+    params.cog = 0;
+    params.satellites_visible = 7;
+    params.alt_ellipsoid = 0;
+    params.h_acc = 0;
+    params.v_acc = 0;
+    params.vel_acc = 0;
+    params.hdg_acc = 0;
+    sendDroneMessage(mavlink.MAVLINK_MSG_ID_GPS_RAW_INT, params, function () {
+
+    });
+
+    // #3 MAVLINK_MSG_ID_ATTITUDE
+    params.time_boot_ms = dji.timestamp;
+    params.roll = dji.roll;
+    params.pitch = dji.pitch;
+    params.yaw = dji.yaw;
+    params.rollspeed = -0.00011268721573287621;
+    params.pitchspeed = 0.0000612109579378739;
+    params.yawspeed = -0.00031687552109360695;
+    sendDroneMessage(mavlink.MAVLINK_MSG_ID_ATTITUDE, params, function () {
+
+    });
+
+    // #4 MAVLINK_MSG_ID_GLOBAL_POSITION_INT
+    params.time_boot_ms = dji.timestamp;
+    params.lat = dji.lat * 1E7;
+    params.lon = dji.lon * 1E7;
+    params.alt = dji.alt;
+    params.relative_alt = dji.relative_alt;
+    params.vx = dji.vx;
+    params.vy = dji.vy;
+    params.vz = dji.vz;
+    params.hdg = 0;
+    sendDroneMessage(mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params, function () {
     });
 }
 
