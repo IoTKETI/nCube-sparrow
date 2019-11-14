@@ -28,7 +28,9 @@ var t_count = 0;
 global.secPort = null;
 
 exports.ready = function tas_ready() {
-    secPortOpening();
+    if(my_secure === 'on') {
+        secPortOpening();
+    }
 };
 
 var SerialPort = require('serialport');
