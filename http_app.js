@@ -39,6 +39,8 @@ global.my_mission_name = '';
 global.lte_mission_name = '';
 global.my_sortie_name = 'disarm';
 
+global.my_drone_type = 'pixhawk';
+
 global.Req_auth = '';
 global.Res_auth = '';
 global.Result_auth = '';
@@ -285,6 +287,13 @@ function retrieve_my_cnt_name(callback) {
             }
             else {
                 mav_ver = 1;
+            }
+
+            if(drone_info.hasOwnProperty('type')) {
+                my_drone_type = drone_info.type;
+            }
+            else {
+                my_drone_type = 'pixhawk';
             }
 
             //info.parent = '/Mobius/UTM_UVARC/GCS_Data';

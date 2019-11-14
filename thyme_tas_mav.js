@@ -38,27 +38,32 @@ var missionBaudrate = '115200';
 
 exports.ready = function tas_ready() {
     if (_server == null) {
-        _server = net.createServer(function (socket) {
-            console.log('socket connected');
-            socket.id = Math.random() * 1000;
-            tas_buffer[socket.id] = '';
-            socket.on('data', tas_handler);
-            socket.on('end', function () {
-                console.log('end');
+        if(my_drone_type === 'dji') {
+            _server = net.createServer(function (socket) {
+                console.log('socket connected');
+                socket.id = Math.random() * 1000;
+                tas_buffer[socket.id] = '';
+                socket.on('data', tas_handler);
+                socket.on('end', function () {
+                    console.log('end');
+                });
+                socket.on('close', function () {
+                    console.log('close');
+                });
+                socket.on('error', function (e) {
+                    console.log('error ', e);
+                });
             });
-            socket.on('close', function () {
-                console.log('close');
-            });
-            socket.on('error', function (e) {
-                console.log('error ', e);
-            });
-        });
 
-        _server.listen(conf.ae.tas_mav_port, function () {
-            console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
-        });
+            _server.listen(conf.ae.tas_mav_port, function () {
+                console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
+            });
+        }
 
-        mavPortOpening();
+        if(my_drone_type === 'pixhawk') {
+            mavPortOpening();
+        }
+
         ltePortOpening();
 
         if(my_mission_name == 'h2battery') {
