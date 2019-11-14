@@ -17,6 +17,8 @@ var net = require('net');
 var ip = require('ip');
 var moment = require('moment');
 
+var mavlink = require('./mavlibrary/mavlink.js');
+
 var socket_arr = {};
 exports.socket_arr = socket_arr;
 
@@ -67,11 +69,177 @@ exports.ready = function tas_ready() {
     }
 };
 
+function mavlinkGenerateMessage(type, params) {
+    var TEST_GEN_MAVLINK_SYSTEM_ID = 8;
+    const mavlinkParser = new MAVLink(null/*logger*/, TEST_GEN_MAVLINK_SYSTEM_ID, 0);
+    try {
+        var mavMsg = null;
+        var genMsg = null;
+        //var targetSysId = sysId;
+        var targetCompId = (params.targetCompId == undefined)?
+            0:
+            params.targetCompId;
+
+        switch( type ) {
+            // MESSAGE ////////////////////////////////////
+            case mavlink.MAVLINK_MSG_ID_PING:
+                mavMsg = new mavlink.messages.ping(params.time_usec, params.seq, params.target_system, params.target_component);
+                break;
+            case mavlink.MAVLINK_MSG_ID_HEARTBEAT:
+                mavMsg = new mavlink.messages.heartbeat(params.type,
+                    params.autopilot,
+                    params.base_mode,
+                    params.custom_mode,
+                    params.system_status,
+                    params.mavlink_version);
+                break;
+            case mavlink.MAVLINK_MSG_ID_GPS_RAW_INT:
+                mavMsg = new mavlink.messages.gps_raw_int(params.time_usec,
+                    params.fix_type,
+                    params.lat,
+                    params.lon,
+                    params.alt,
+                    params.eph,
+                    params.epv,
+                    params.vel,
+                    params.cog,
+                    params.satellites_visible,
+                    params.alt_ellipsoid,
+                    params.h_acc,
+                    params.v_acc,
+                    params.vel_acc,
+                    params.hdg_acc);
+                break;
+            case mavlink.MAVLINK_MSG_ID_ATTITUDE:
+                mavMsg = new mavlink.messages.attitude(params.time_boot_ms,
+                    params.roll,
+                    params.pitch,
+                    params.yaw,
+                    params.rollspeed,
+                    params.pitchspeed,
+                    params.yawspeed);
+                break;
+            case mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
+                mavMsg = new mavlink.messages.global_position_int(params.time_boot_ms,
+                    params.lat,
+                    params.lon,
+                    params.alt,
+                    params.relative_alt,
+                    params.vx,
+                    params.vy,
+                    params.vz,
+                    params.hdg);
+                break;
+        }
+    }
+    catch( e ) {
+        console.log( 'MAVLINK EX:' + e );
+    }
+
+    if (mavMsg) {
+        genMsg = new Buffer(mavMsg.pack(mavlinkParser));
+        //console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
+    }
+
+    return genMsg;
+}
+
+function sendDroneMessage(type, params, callback) {
+    try {
+        var msg = mavlinkGenerateMessage(type, params);
+        if (msg == null) {
+            console.log("mavlink message is null");
+        }
+        else {
+            console.log('msg: ', msg);
+            // console.log('msg_seq : ', msg.slice(2,3));
+            //mqtt_client.publish(my_cnt_name, msg.toString('hex'));
+            //_this.send_aggr_to_Mobius(my_cnt_name, msg.toString('hex'), 1500);
+            mavPortData(msg);
+            callback();
+        }
+    }
+    catch( ex ) {
+        console.log( '[ERROR] ' + ex );
+        callback();
+    }
+}
+
+var dji = {};
+var params = {};
+
 function tas_handler(data) {
-    socket_mav = this;
-    //mqtt_client.publish(my_cnt_name, data);
-    
-    //send_aggr_to_Mobius(my_cnt_name, data.toString(), 100);
+    var data_arr = data.toString().split(',');
+
+    dji.flightstatus = data_arr[0];
+    dji.timestamp = data_arr[1].slice(1, data_arr[1].length);
+    dji.lat = data_arr[2];
+    dji.lon = data_arr[3];
+    dji.alt = data_arr[4];
+    dji.relative_alt = data_arr[5];
+    dji.roll = data_arr[6];
+    dji.pitch = data_arr[7];
+    dji.yaw = data_arr[8];
+    dji.vx = data_arr[9];
+    dji.vy = data_arr[10];
+    dji.vz = data_arr[11];
+    dji.battery = data_arr[12];
+
+    // #0 PING
+    params.time_usec = dji.timestamp;
+    params.seq = 0;
+    params.target_system = 0;
+    params.target_component = 0;
+    sendDroneMessage(mavlink.MAVLINK_MSG_ID_PING, params, function () {
+        // #1 HEARTBEAT
+        params.type = 2;
+        params.autopilot = 3;
+        params.base_mode = 81;
+        params.system_status = 4;
+        params.mavlink_version = 3;
+        sendDroneMessage(mavlink.MAVLINK_MSG_ID_HEARTBEAT, params, function () {
+            // #2 MAVLINK_MSG_ID_GPS_RAW_INT
+            params.time_usec = 0;
+            params.fix_type = 3;
+            params.lat = dji.lat * 1E7;
+            params.lon = dji.lon * 1E7;
+            params.alt = dji.alt;
+            params.eph = 175;
+            params.epv = 270;
+            params.vel = 7;
+            params.cog = 0;
+            params.satellites_visible = 7;
+            params.alt_ellipsoid = 0;
+            params.h_acc = 0;
+            params.v_acc = 0;
+            params.vel_acc = 0;
+            params.hdg_acc = 0;
+            sendDroneMessage(mavlink.MAVLINK_MSG_ID_GPS_RAW_INT, params, function () {
+                // #3 MAVLINK_MSG_ID_ATTITUDE
+                params.time_boot_ms = dji.timestamp;
+                params.roll = dji.roll;
+                params.pitch = dji.pitch;
+                params.yaw = dji.yaw;
+                params.rollspeed = -0.00011268721573287621;
+                params.pitchspeed = 0.0000612109579378739;
+                params.yawspeed = -0.00031687552109360695;
+                sendDroneMessage(mavlink.MAVLINK_MSG_ID_ATTITUDE, params, function () {
+                    // #4 MAVLINK_MSG_ID_GLOBAL_POSITION_INT
+                    params.time_boot_ms = dji.timestamp;
+                    params.lat = dji.lat * 1E7;
+                    params.lon = dji.lon * 1E7;
+                    params.alt = dji.alt;
+                    params.relative_alt = dji.relative_alt;
+                    params.vx = dji.vx;
+                    params.vy = dji.vy;
+                    params.vz = dji.vz;
+                    params.hdg = 0;
+                    sendDroneMessage(mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params, function () {
+                    });
+                });
+            });
+        });
+    });
 }
 
 exports.noti = function (path_arr, cinObj, socket) {

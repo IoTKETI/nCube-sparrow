@@ -452,9 +452,6 @@ function check_rtv_cnt() {
 // for notification
 //var xmlParser = bodyParser.text({ type: '*/*' });
 
-global.socket_mav = null;
-global.socket_sec = null;
-
 function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
     if(mqtt_client == null) {
         if (conf.usesecure === 'disable') {
@@ -505,10 +502,6 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
 
     mqtt_client.on('message', function (topic, message) {
         if(topic == gcs_noti_topic) {
-            if (socket_mav) {
-                socket_mav.write(message);
-            }
-
             if (mavPort != null) {
                 if (mavPort.isOpen) {
                     mavPort.write(message);
