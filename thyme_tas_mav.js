@@ -640,7 +640,7 @@ function lteReqGetRssi() {
     }
 }
 
-setInterval(lteReqGetRssi, 3000);
+setInterval(lteReqGetRssi, 2000);
 
 var count = 0;
 var strRssi = '';
@@ -772,34 +772,24 @@ function missionPortData(data) {
             var refLen = 0;
             var lenCount = 0;
             for (var i = 0; i < missionStr.length; i += 2) {
-                var str = missionStr.substr(i, 2);
-                //console.log(str + ' - ' + secPacket);
-                if (start == 0) {
-                    if (str == 'fe') {
-                        start = 1;
-                        missionPacket += str;
-                        lenCount++;
-                    }
-                    else {
-                        start = 0;
-                        missionPacket = '';
-                        lenCount = 0;
-                        missionStr = missionStr.substr(i + 2);
-                        i = -2;
-                        if (missionStr.length >= 88) {
-                            break;
-                        }
+                var head = missionStr.substr(0, 2);
+                var tail = missionStr.substr(86, 2);
+
+                if(head == 'fe' && tail == 'ff') {
+                    missionPacket = missionStr.substr(0, 88);
+                    console.log('Parse Mission  - ' + missionPacket);
+                    setTimeout(parseMission, 0, missionPacket);
+                    missionStr = missionStr.substr(88);
+                    i = -2;
+                    if (missionStr.length <= 88) {
+                        break;
                     }
                 }
-                else if (start == 1) {
-                    missionPacket += str;
-                    lenCount++;
-                    if (44 <= lenCount) {
-                        console.log('Parse Mission  - ' + missionPacket);
-                        setTimeout(parseMission, 0, missionPacket);
-                        missionStr = missionStr.substr(i + 2);
-                        i = -2;
-                        start = 0;
+                else {
+                    missionStr = missionStr.substr(i + 2);
+                    i = -2;
+                    if (missionStr.length <= 88) {
+                        break;
                     }
                 }
             }
@@ -887,6 +877,6 @@ function parseMission(missionPacket) {
         mission.H2BATTERY.fuelcell2_temp2 = fuelcell2_temp2;
         mission.H2BATTERY.fuelcell2_current = fuelcell2_current;
 
-        send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, JSON.stringify(mission), 1500);
+        send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, mission, 1000);
     }
 }
