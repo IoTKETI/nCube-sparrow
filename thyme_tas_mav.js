@@ -68,7 +68,7 @@ exports.ready = function tas_ready() {
 
         if(my_mission_name == 'h2battery') {
             missionPortNum = '/dev/ttyUSB3';
-            missionBaudrate = '115200';
+            missionBaudrate = '57600';
             missionPortOpening();
         }
     }
@@ -755,7 +755,7 @@ function ltePortData(data) {
 }
 
 function sendLteRssi(gpi) {
-    var parent = lte_parent_mission_name+'?rcn=0';
+    var parent = lte_mission_name+'?rcn=0';
     sh_adn.crtci(parent, 0, gpi, null, function () {
 
     });
