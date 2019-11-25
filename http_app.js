@@ -36,6 +36,7 @@ global.my_cnt_name = '';
 global.pre_my_cnt_name = '';
 global.my_mission_parent = '';
 global.my_mission_name = '';
+global.lte_parent_mission_name = '';
 global.lte_mission_name = '';
 global.my_sortie_name = 'disarm';
 
@@ -252,13 +253,13 @@ function retrieve_my_cnt_name(callback) {
             info.name = my_sortie_name;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
-            sh_adn.delae(info.parent + '/' + info.name, function () {
-                console.log('delete container named disarm')
-            });
-
             my_parent_cnt_name = info.parent;
             my_cnt_name = my_parent_cnt_name + '/' + info.name;
-            
+
+            sh_adn.del_resource(my_cnt_name, function () {
+                console.log('delete container named disarm of drone');
+            });
+
             info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
             info.name = drone_info.drone;
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
@@ -268,7 +269,16 @@ function retrieve_my_cnt_name(callback) {
             info.name = 'LTE';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
-            lte_mission_name = info.parent + '/' + info.name;
+            lte_parent_mission_name = info.parent + '/' + info.name;
+            lte_mission_name = lte_parent_mission_name + '/disarm';
+
+            sh_adn.del_resource(lte_mission_name, function () {
+                console.log('delete container named disarm of mission');
+            });
+
+            info.parent = lte_parent_mission_name;
+            info.name = 'disarm';
+            conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
             if(drone_info.hasOwnProperty('mission')) {
                 info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
@@ -545,33 +555,3 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
         console.log(err.message);
     });
 }
-
-var aggr_content = {};
-
-global.send_aggr_to_Mobius = function(topic, content_each, gap) {
-    if(aggr_content.hasOwnProperty(topic)) {
-        var timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
-        aggr_content[topic][timestamp] = content_each;
-    }
-    else {
-        aggr_content[topic] = {};
-        timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
-        aggr_content[topic][timestamp] = content_each;
-
-        setTimeout(function () {
-            sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
-
-            });
-
-            delete aggr_content[topic];
-        }, gap, topic);
-    }
-};
-
-global.send_to_Mobius = function(topic, content_each, gap) {
-    setTimeout(function (topic, content_each) {
-        sh_adn.crtci(topic+'?rcn=0', 0, content_each, null, function () {
-
-        });
-    }, gap, topic, content_each);
-};

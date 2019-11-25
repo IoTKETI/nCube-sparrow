@@ -153,6 +153,13 @@ exports.delae = function (target, callback) {
     });
 };
 
+exports.del_resource = function (target, callback) {
+    http_request('Superman', target, 'delete', '', '', function (res, res_body) {
+        callback(res.headers['x-m2m-rsc'], res_body);
+    });
+};
+
+
 exports.crtct = function(parent, rn, count, callback) {
     var results_ct = {};
 

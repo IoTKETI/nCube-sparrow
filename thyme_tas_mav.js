@@ -43,7 +43,7 @@ exports.ready = function tas_ready() {
                 console.log('socket connected');
                 socket.id = Math.random() * 1000;
                 tas_buffer[socket.id] = '';
-                socket.on('data', tas_handler);
+                socket.on('data', dji_handler);
                 socket.on('end', function () {
                     console.log('end');
                 });
@@ -73,6 +73,30 @@ exports.ready = function tas_ready() {
         }
     }
 };
+
+
+var aggr_content = {};
+
+function send_aggr_to_Mobius(topic, content_each, gap) {
+    if(aggr_content.hasOwnProperty(topic)) {
+        var timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
+        aggr_content[topic][timestamp] = content_each;
+    }
+    else {
+        aggr_content[topic] = {};
+        timestamp = moment().format('YYYY-MM-DDThh:mm:ssSSS');
+        aggr_content[topic][timestamp] = content_each;
+
+        setTimeout(function () {
+            sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
+
+            });
+
+            delete aggr_content[topic];
+        }, gap, topic);
+    }
+}
+
 
 function mavlinkGenerateMessage(type, params) {
     var TEST_GEN_MAVLINK_SYSTEM_ID = 8;
@@ -173,7 +197,7 @@ function sendDroneMessage(type, params, callback) {
 var dji = {};
 var params = {};
 
-function tas_handler(data) {
+function dji_handler(data) {
     var data_arr = data.toString().split(',');
 
     dji.flightstatus = data_arr[0];
@@ -569,10 +593,25 @@ function parseMav(mavPacket) {
         if(hb.HEARTBEAT.base_mode & 0x80) {
             if(flag_base_mode == 0) {
                 flag_base_mode = 1;
+
+                my_sortie_name = 'disarm';
+                my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
+                sh_adn.del_resource(my_cnt_name+'?rcn=0', function () {
+                    console.log('delete container named disarm')
+                });
+
+                lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
+                sh_adn.del_resource(lte_mission_name+'?rcn=0', function () {
+                    console.log('delete container named disarm')
+                });
+
                 my_sortie_name = moment().format('YYYY_MM_DD_T_hh_mm');
                 my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
-                
-                sh_adn.crtct(my_parent_cnt_name+'?rcn=0', my_cnt_name, 0, function (rsc, res_body, count) {
+                sh_adn.crtct(my_parent_cnt_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
+                });
+
+                lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
+                sh_adn.crtct(lte_parent_mission_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
                 });
             }
         }
@@ -580,6 +619,12 @@ function parseMav(mavPacket) {
             flag_base_mode = 0;
             my_sortie_name = 'disarm';
             my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
+            sh_adn.crtct(my_parent_cnt_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
+            });
+
+            lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
+            sh_adn.crtct(lte_parent_mission_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
+            });
         }
                 
         //console.log(hb);
@@ -710,7 +755,7 @@ function ltePortData(data) {
 }
 
 function sendLteRssi(gpi) {
-    var parent = lte_mission_name+'?rcn=0';
+    var parent = lte_parent_mission_name+'?rcn=0';
     sh_adn.crtci(parent, 0, gpi, null, function () {
 
     });

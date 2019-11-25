@@ -33,6 +33,15 @@ exports.ready = function tas_ready() {
     }
 };
 
+function send_to_Mobius(topic, content_each, gap) {
+    setTimeout(function (topic, content_each) {
+        sh_adn.crtci(topic+'?rcn=0', 0, content_each, null, function () {
+
+        });
+    }, gap, topic, content_each);
+}
+
+
 var SerialPort = require('serialport');
 
 function secPortOpening() {
