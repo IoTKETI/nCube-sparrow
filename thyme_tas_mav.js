@@ -60,6 +60,9 @@ exports.ready = function tas_ready() {
                     if (err) {
                         console.log('Child process exited with error code', err.code);
                     }
+                    else {
+                        console.log('djiosdk-Mobius running');
+                    }
                 });
             });
 
