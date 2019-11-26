@@ -55,6 +55,10 @@ exports.ready = function tas_ready() {
                 socket.on('error', function (e) {
                     console.log('error ', e);
                 });
+            });
+
+            _server.listen(conf.ae.tas_mav_port, function () {
+                console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
 
                 exec('./djiosdk-Mobius UserConfig.txt', function (err, stdout, stderr) {
                     if (err) {
@@ -64,10 +68,6 @@ exports.ready = function tas_ready() {
                         console.log('djiosdk-Mobius running');
                     }
                 });
-            });
-
-            _server.listen(conf.ae.tas_mav_port, function () {
-                console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
             });
         }
         else if(my_drone_type === 'pixhawk') {
