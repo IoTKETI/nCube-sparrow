@@ -256,9 +256,9 @@ function retrieve_my_cnt_name(callback) {
             my_parent_cnt_name = info.parent;
             my_cnt_name = my_parent_cnt_name + '/' + info.name;
 
-            sh_adn.del_resource(my_cnt_name, function () {
-                console.log('delete container named disarm of drone');
-            });
+            // sh_adn.del_resource(my_cnt_name, function () {
+            //     console.log('delete container named disarm of drone');
+            // });
 
             info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data';
             info.name = drone_info.drone;
@@ -272,9 +272,9 @@ function retrieve_my_cnt_name(callback) {
             lte_parent_mission_name = info.parent + '/' + info.name;
             lte_mission_name = lte_parent_mission_name + '/disarm';
 
-            sh_adn.del_resource(lte_mission_name, function () {
-                console.log('delete container named disarm of mission');
-            });
+            // sh_adn.del_resource(lte_mission_name, function () {
+            //     console.log('delete container named disarm of mission');
+            // });
 
             info.parent = lte_parent_mission_name;
             info.name = 'disarm';

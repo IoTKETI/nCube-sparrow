@@ -594,16 +594,16 @@ function parseMav(mavPacket) {
             if(flag_base_mode == 0) {
                 flag_base_mode = 1;
 
-                my_sortie_name = 'disarm';
-                my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
-                sh_adn.del_resource(my_cnt_name+'?rcn=0', function () {
-                    console.log('delete container named disarm')
-                });
+                // my_sortie_name = 'disarm';
+                // my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
+                // sh_adn.del_resource(my_cnt_name+'?rcn=0', function () {
+                //     console.log('delete container named disarm')
+                // });
 
                 lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
-                sh_adn.del_resource(lte_mission_name+'?rcn=0', function () {
-                    console.log('delete container named disarm')
-                });
+                // sh_adn.del_resource(lte_mission_name+'?rcn=0', function () {
+                //     console.log('delete container named disarm')
+                // });
 
                 my_sortie_name = moment().format('YYYY_MM_DD_T_hh_mm');
                 my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
