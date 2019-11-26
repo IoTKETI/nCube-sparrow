@@ -56,7 +56,7 @@ exports.ready = function tas_ready() {
                     console.log('error ', e);
                 });
 
-                exec('/djiosdk-Mobius UserConfig.txt', function (err, stdout, stderr) {
+                exec('./djiosdk-Mobius UserConfig.txt', function (err, stdout, stderr) {
                     if (err) {
                         console.log('Child process exited with error code', err.code);
                     }
