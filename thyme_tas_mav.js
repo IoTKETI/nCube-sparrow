@@ -600,7 +600,7 @@ function parseMav(mavPacket) {
                 //     console.log('delete container named disarm')
                 // });
 
-                lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
+                //lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
                 // sh_adn.del_resource(lte_mission_name+'?rcn=0', function () {
                 //     console.log('delete container named disarm')
                 // });
