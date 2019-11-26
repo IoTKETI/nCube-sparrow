@@ -17,6 +17,8 @@ var net = require('net');
 var ip = require('ip');
 var moment = require('moment');
 
+var exec = require('child_process').exec;
+
 var mavlink = require('./mavlibrary/mavlink.js');
 
 var socket_arr = {};
@@ -53,14 +55,19 @@ exports.ready = function tas_ready() {
                 socket.on('error', function (e) {
                     console.log('error ', e);
                 });
+
+                exec('/djiosdk-Mobius UserConfig.txt', function (err, stdout, stderr) {
+                    if (err) {
+                        console.log('Child process exited with error code', err.code);
+                    }
+                });
             });
 
             _server.listen(conf.ae.tas_mav_port, function () {
                 console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
             });
         }
-
-        if(my_drone_type === 'pixhawk') {
+        else if(my_drone_type === 'pixhawk') {
             mavPortOpening();
         }
 
