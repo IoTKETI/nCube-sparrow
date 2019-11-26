@@ -511,7 +511,7 @@ function parseMav(mavPacket) {
 
         //console.log(gpi);
     }
-    
+
     else if (msgid == '4c') { // #76 : COMMAND_LONG
         // if(authResult == 'done') {
         //     if (secPort.isOpen) {
@@ -532,7 +532,7 @@ function parseMav(mavPacket) {
         //     }
         // }
     }
-    
+
     else if (msgid == '00') { // #00 : HEARTBEAT
         if(authResult == 'done') {
             if (secPort.isOpen) {
@@ -581,7 +581,7 @@ function parseMav(mavPacket) {
             base_offset += 2;
             mavlink_version = mavPacket.substr(base_offset, 2).toLowerCase();
         }
-        
+
         //console.log(mavPacket);
         hb.HEARTBEAT.type = Buffer.from(type, 'hex').readUInt8(0);
         hb.HEARTBEAT.autopilot = Buffer.from(autopilot, 'hex').readUInt8(0);
@@ -589,7 +589,7 @@ function parseMav(mavPacket) {
         hb.HEARTBEAT.custom_mode = Buffer.from(custom_mode, 'hex').readUInt32LE(0);
         hb.HEARTBEAT.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
         hb.HEARTBEAT.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
-        
+
         if(hb.HEARTBEAT.base_mode & 0x80) {
             if(flag_base_mode == 0) {
                 flag_base_mode = 1;
@@ -626,7 +626,7 @@ function parseMav(mavPacket) {
             sh_adn.crtct(lte_parent_mission_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
             });
         }
-                
+
         //console.log(hb);
     }
 }
@@ -692,11 +692,11 @@ var strRssi = '';
 
 function ltePortData(data) {
     strRssi += data.toString();
-    
+
     //console.log(strRssi);
-    
+
     var arrRssi = strRssi.split('OK');
-    
+
     if(arrRssi.length >= 2) {
         //console.log(arrRssi);
 
@@ -745,11 +745,11 @@ function ltePortData(data) {
                 }
             }
         }
-        
+
         //console.log(gpi);
-        
+
         setTimeout(sendLteRssi, 0, gpi);
-        
+
         strRssi = '';
     }
 }
@@ -805,13 +805,33 @@ function missionPortError(error) {
     setTimeout(missionPortOpening, 2000);
 }
 
-var missionStr = [];
+var missionStr = '';
+var missionStrArr = [];
 var missionStrPacket = '';
 function missionPortData(data) {
     if(my_mission_name == 'h2battery') {
-        missionStr += data.toString('hex');
+        missionStr += data.toString();
 
-        if(missionStr.length >= 88) {
+        //console.log(missionStr);
+
+        if(missionStr[missionStr.length-1] == '\n') {
+            missionPacket = missionStr.substr(0, missionStr.length);
+            missionStr = missionStr.substr(0, missionStr.length);
+
+            //missionPacket.replace(/\'\u0000\n\'/g, '\n');
+            missionPacket.replace(/ /g, '');
+            missionPacketArr = missionPacket.split('\n');
+
+//            console.log(missionPacketArr[1]);
+
+            missionStrArr = missionPacketArr[1].split('\t');
+
+//            console.log(missionStrArr);
+
+            setTimeout(parseMission, 0, missionStrArr);
+        }
+
+        /*if(missionStr.length >= 88) {
             var missionPacket = '';
             var start = 0;
             var refLen = 0;
@@ -838,7 +858,7 @@ function missionPortData(data) {
                     }
                 }
             }
-        }
+        }*/
     }
 }
 
@@ -848,62 +868,78 @@ function parseMission(missionPacket) {
     if(my_mission_name == 'h2battery') {
         mission.H2BATTERY = {};
 
-        var base_offset = 10;
-        var decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var h2 = decimal / 10;
+        var h2 = parseFloat(missionPacket[1], 10);
+        var output_voltage = parseFloat(missionPacket[2], 10);
+        var output_current = parseFloat(missionPacket[3], 10);
+        var battery_voltage = parseFloat(missionPacket[4], 10);
+        var battery_current = parseFloat(missionPacket[5], 10);
+        var powerpack_temp = parseFloat(missionPacket[8], 10);
+        var fuelcell1_voltage = parseFloat(missionPacket[9], 10);
+        var fuelcell1_temp1 = parseFloat(missionPacket[10], 10);
+        var fuelcell1_temp2 = parseFloat(missionPacket[11], 10);
+        var fuelcell1_current = parseFloat(missionPacket[12], 10);
+        var fuelcell2_voltage = parseFloat(missionPacket[16], 10);
+        var fuelcell2_temp1 = parseFloat(missionPacket[17], 10);
+        var fuelcell2_temp2 = parseFloat(missionPacket[18], 10);
+        var fuelcell2_current = parseFloat(missionPacket[19], 10);
 
-        base_offset = 14;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var output_voltage = decimal / 100;
+        /*
+                var base_offset = 10;
+                var decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var h2 = decimal / 10;
 
-        base_offset = 18;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var output_current = decimal / 100;
+                base_offset = 14;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var output_voltage = decimal / 100;
 
-        base_offset = 22;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var battery_voltage = decimal / 100;
+                base_offset = 18;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var output_current = decimal / 100;
 
-        base_offset = 26;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var battery_current = decimal / 100;
+                base_offset = 22;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var battery_voltage = decimal / 100;
 
-        base_offset = 34;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var powerpack_temp = decimal / 10 - 40;
+                base_offset = 26;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var battery_current = decimal / 100;
 
-        base_offset = 38;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell1_voltage = decimal / 10;
+                base_offset = 34;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var powerpack_temp = decimal / 10 - 40;
 
-        base_offset = 42;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell1_temp1 = decimal / 10 - 40;
+                base_offset = 38;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell1_voltage = decimal / 10;
 
-        base_offset = 46;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell1_temp2 = decimal / 10 - 40;
+                base_offset = 42;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell1_temp1 = decimal / 10 - 40;
 
-        base_offset = 50;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell1_current = decimal / 100;
+                base_offset = 46;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell1_temp2 = decimal / 10 - 40;
 
-        base_offset = 62;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell2_voltage = decimal / 10;
+                base_offset = 50;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell1_current = decimal / 100;
 
-        base_offset = 66;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell2_temp1 = decimal / 10 - 40;
+                base_offset = 62;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell2_voltage = decimal / 10;
 
-        base_offset = 70;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell2_temp2 = decimal / 10 - 40;
+                base_offset = 66;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell2_temp1 = decimal / 10 - 40;
 
-        base_offset = 74;
-        decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-        var fuelcell2_current = decimal / 100;
+                base_offset = 70;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell2_temp2 = decimal / 10 - 40;
 
+                base_offset = 74;
+                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
+                var fuelcell2_current = decimal / 100;
+        */
         //console.log(mavPacket);
         mission.H2BATTERY.h2 = h2;
         mission.H2BATTERY.output_voltage = output_voltage;
