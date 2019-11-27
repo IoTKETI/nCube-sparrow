@@ -250,10 +250,16 @@ function dji_handler(data) {
     setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_PING, params);
 
     // #1 HEARTBEAT
-    // todo: dji heartbeat must be modify
     params.type = 2;
     params.autopilot = 3;
-    params.base_mode = 81;
+
+    if(dji.flightstatus == 0) {
+        params.base_mode = 81;
+    }
+    else {
+        params.base_mode = (81 | 0x80);
+    }
+
     params.system_status = 4;
     params.mavlink_version = 3;
     setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_HEARTBEAT, params);
