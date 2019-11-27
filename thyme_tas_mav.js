@@ -17,8 +17,6 @@ var net = require('net');
 var ip = require('ip');
 var moment = require('moment');
 
-var exec = require('child_process').exec;
-
 var mavlink = require('./mavlibrary/mavlink.js');
 
 var socket_arr = {};
@@ -60,14 +58,7 @@ exports.ready = function tas_ready() {
             _server.listen(conf.ae.tas_mav_port, function () {
                 console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
 
-                exec('./djiosdk-Mobius UserConfig.txt', function (err, stdout, stderr) {
-                    if (err) {
-                        console.log('Child process exited with error code', err.code);
-                    }
-                    else {
-                        console.log('djiosdk-Mobius running');
-                    }
-                });
+                setTimeout(dji_sdk_lunch, 1500);
             });
         }
         else if(my_drone_type === 'pixhawk') {
@@ -83,6 +74,35 @@ exports.ready = function tas_ready() {
         }
     }
 };
+
+var spawn = require('child_process').spawn;
+var djiosdk = null;
+
+function dji_sdk_lunch() {
+    djiosdk = spawn('./djiosdk-Mobius', ['UserConfig.txt']);
+
+    djiosdk.stdout.on('data', function(data) {
+        console.log('stdout: ' + data);
+    });
+
+    djiosdk.stderr.on('data', function(data) {
+        console.log('stderr: ' + data);
+
+        setTimeout(dji_sdk_lunch, 1500);
+    });
+
+    djiosdk.on('exit', function(code) {
+        console.log('exit: ' + code);
+
+        setTimeout(dji_sdk_lunch, 1500);
+    });
+
+    djiosdk.on('error', function(code) {
+        console.log('error: ' + code);
+
+        setTimeout(dji_sdk_lunch, 1500);
+    });
+}
 
 
 var aggr_content = {};
@@ -183,7 +203,7 @@ function mavlinkGenerateMessage(type, params) {
     return genMsg;
 }
 
-function sendDroneMessage(type, params, callback) {
+function sendDroneMessage(type, params) {
     try {
         var msg = mavlinkGenerateMessage(type, params);
         if (msg == null) {
@@ -195,12 +215,10 @@ function sendDroneMessage(type, params, callback) {
             //mqtt_client.publish(my_cnt_name, msg.toString('hex'));
             //_this.send_aggr_to_Mobius(my_cnt_name, msg.toString('hex'), 1500);
             mavPortData(msg);
-            callback();
         }
     }
     catch( ex ) {
         console.log( '[ERROR] ' + ex );
-        callback();
     }
 }
 
@@ -229,22 +247,19 @@ function dji_handler(data) {
     params.seq = 0;
     params.target_system = 0;
     params.target_component = 0;
-    sendDroneMessage(mavlink.MAVLINK_MSG_ID_PING, params, function () {
-
-    });
+    setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_PING, params);
 
     // #1 HEARTBEAT
+    // todo: dji heartbeat must be modify
     params.type = 2;
     params.autopilot = 3;
     params.base_mode = 81;
     params.system_status = 4;
     params.mavlink_version = 3;
-    sendDroneMessage(mavlink.MAVLINK_MSG_ID_HEARTBEAT, params, function () {
-
-    });
+    setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_HEARTBEAT, params);
 
     // #2 MAVLINK_MSG_ID_GPS_RAW_INT
-    params.time_usec = 0;
+    params.time_usec = dji.timestamp;
     params.fix_type = 3;
     params.lat = dji.lat * 1E7;
     params.lon = dji.lon * 1E7;
@@ -259,9 +274,7 @@ function dji_handler(data) {
     params.v_acc = 0;
     params.vel_acc = 0;
     params.hdg_acc = 0;
-    sendDroneMessage(mavlink.MAVLINK_MSG_ID_GPS_RAW_INT, params, function () {
-
-    });
+    setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_GPS_RAW_INT, params);
 
     // #3 MAVLINK_MSG_ID_ATTITUDE
     params.time_boot_ms = dji.timestamp;
@@ -271,9 +284,7 @@ function dji_handler(data) {
     params.rollspeed = -0.00011268721573287621;
     params.pitchspeed = 0.0000612109579378739;
     params.yawspeed = -0.00031687552109360695;
-    sendDroneMessage(mavlink.MAVLINK_MSG_ID_ATTITUDE, params, function () {
-
-    });
+    setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_ATTITUDE, params);
 
     // #4 MAVLINK_MSG_ID_GLOBAL_POSITION_INT
     params.time_boot_ms = dji.timestamp;
@@ -285,8 +296,7 @@ function dji_handler(data) {
     params.vy = dji.vy;
     params.vz = dji.vz;
     params.hdg = 0;
-    sendDroneMessage(mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params, function () {
-    });
+    setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params);
 }
 
 exports.noti = function (path_arr, cinObj, socket) {
@@ -816,8 +826,6 @@ function missionPortError(error) {
 }
 
 var missionStr = '';
-var missionStrArr = [];
-var missionStrPacket = '';
 function missionPortData(data) {
     if(my_mission_name == 'h2battery') {
         missionStr += data.toString();
@@ -825,20 +833,18 @@ function missionPortData(data) {
         //console.log(missionStr);
 
         if(missionStr[missionStr.length-1] == '\n') {
-            missionPacket = missionStr.substr(0, missionStr.length);
-            missionStr = missionStr.substr(0, missionStr.length);
+            var missionPacket = missionStr.substr(0, missionStr.length);
 
             //missionPacket.replace(/\'\u0000\n\'/g, '\n');
-            missionPacket.replace(/ /g, '');
-            missionPacketArr = missionPacket.split('\n');
+            missionPacket = missionPacket.replace(/ /g, '');
+            var missionPacketArr = missionPacket.split('\n');
+            var missionStrArr = missionPacketArr[1].split('\t');
 
 //            console.log(missionPacketArr[1]);
-
-            missionStrArr = missionPacketArr[1].split('\t');
-
 //            console.log(missionStrArr);
 
             setTimeout(parseMission, 0, missionStrArr);
+            missionStr = missionStr.substr(0, missionStr.length);
         }
 
         /*if(missionStr.length >= 88) {
@@ -883,6 +889,8 @@ function parseMission(missionPacket) {
         var output_current = parseFloat(missionPacket[3], 10);
         var battery_voltage = parseFloat(missionPacket[4], 10);
         var battery_current = parseFloat(missionPacket[5], 10);
+        var powerpack_state = parseInt(missionPacket[6], 10);
+        var error_code = parseInt(missionPacket[7], 10);
         var powerpack_temp = parseFloat(missionPacket[8], 10);
         var fuelcell1_voltage = parseFloat(missionPacket[9], 10);
         var fuelcell1_temp1 = parseFloat(missionPacket[10], 10);
@@ -956,6 +964,9 @@ function parseMission(missionPacket) {
         mission.H2BATTERY.output_current = output_current;
         mission.H2BATTERY.battery_voltage = battery_voltage;
         mission.H2BATTERY.battery_current = battery_current;
+
+        mission.H2BATTERY.powerpack_state = powerpack_state;
+        mission.H2BATTERY.error_code = error_code;
         mission.H2BATTERY.powerpack_temp = powerpack_temp;
 
         mission.H2BATTERY.fuelcell1_voltage = fuelcell1_voltage;
@@ -968,6 +979,6 @@ function parseMission(missionPacket) {
         mission.H2BATTERY.fuelcell2_temp2 = fuelcell2_temp2;
         mission.H2BATTERY.fuelcell2_current = fuelcell2_current;
 
-        send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, mission, 1000);
+        send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, mission, 1500);
     }
 }
