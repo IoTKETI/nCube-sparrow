@@ -228,7 +228,7 @@ var params = {};
 function dji_handler(data) {
     var data_arr = data.toString().split(',');
 
-    dji.flightstatus = data_arr[0];
+    dji.flightstatus = data_arr[0].replace('[', '');
     dji.timestamp = data_arr[1].slice(1, data_arr[1].length);
     dji.lat = data_arr[2];
     dji.lon = data_arr[3];
@@ -240,7 +240,7 @@ function dji_handler(data) {
     dji.vx = data_arr[9];
     dji.vy = data_arr[10];
     dji.vz = data_arr[11];
-    dji.battery = data_arr[12];
+    dji.battery = data_arr[12].replace(']', '');
 
     // #0 PING
     params.time_usec = dji.timestamp;
@@ -253,7 +253,7 @@ function dji_handler(data) {
     params.type = 2;
     params.autopilot = 3;
 
-    if(dji.flightstatus == 0) {
+    if(dji.flightstatus == '0') {
         params.base_mode = 81;
     }
     else {
@@ -645,12 +645,12 @@ function parseMav(mavPacket) {
             flag_base_mode = 0;
             my_sortie_name = 'disarm';
             my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
-            sh_adn.crtct(my_parent_cnt_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
-            });
+            // sh_adn.crtct(my_parent_cnt_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
+            // });
 
             lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
-            sh_adn.crtct(lte_parent_mission_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
-            });
+            // sh_adn.crtct(lte_parent_mission_name+'?rcn=0', my_sortie_name, 0, function (rsc, res_body, count) {
+            // });
         }
 
         //console.log(hb);
