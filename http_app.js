@@ -345,7 +345,8 @@ function retrieve_my_cnt_name(callback) {
         }
         else {
             console.log('x-m2m-rsc : ' + rsc + ' <----' + res_body);
-            setTimeout(http_watchdog, 2000);
+            setTimeout(http_watchdog, 2500);
+            callback();
         }
     });
 }

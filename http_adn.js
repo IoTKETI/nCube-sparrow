@@ -80,7 +80,7 @@ function http_request(origin, path, method, ty, bodyString, callback) {
                     console.log('[http_adn] json parse error]');
                     jsonObj = {};
                     jsonObj.dbg = res_body;
-                    callback(res.headers['x-m2m-rsc'], jsonObj);
+                    callback(9999, jsonObj);
                 }
             }
         });
@@ -91,7 +91,7 @@ function http_request(origin, path, method, ty, bodyString, callback) {
         jsonObj = {};
         jsonObj.dbg = e.message;
 
-        callback(res.headers['x-m2m-rsc'], jsonObj);
+        callback(9999, jsonObj);
     });
 
     //console.log(bodyString);
