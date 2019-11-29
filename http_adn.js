@@ -51,6 +51,7 @@ function http_request(origin, path, method, ty, bodyString, callback) {
     }
 
     var res_body = '';
+    var jsonObj = {};
     var req = http.request(options, function (res) {
         //console.log('[crtae response : ' + res.statusCode);
 
@@ -68,18 +69,18 @@ function http_request(origin, path, method, ty, bodyString, callback) {
             else {
                 try {
                     if(res_body == '') {
-                        var jsonObj = {};
+                        jsonObj = {};
                     }
                     else {
                         jsonObj = JSON.parse(res_body);
                     }
-                    callback(res, jsonObj);
+                    callback(res.headers['x-m2m-rsc'], jsonObj);
                 }
                 catch (e) {
                     console.log('[http_adn] json parse error]');
-                    var jsonObj = {};
+                    jsonObj = {};
                     jsonObj.dbg = res_body;
-                    callback(res, jsonObj);
+                    callback(res.headers['x-m2m-rsc'], jsonObj);
                 }
             }
         });
@@ -87,6 +88,10 @@ function http_request(origin, path, method, ty, bodyString, callback) {
 
     req.on('error', function (e) {
         console.log('problem with request: ' + e.message);
+        jsonObj = {};
+        jsonObj.dbg = e.message;
+
+        callback(res.headers['x-m2m-rsc'], jsonObj);
     });
 
     //console.log(bodyString);
@@ -116,14 +121,14 @@ exports.crtae = function (parent, rn, api, callback) {
         bodyString = JSON.stringify(results_ae);
     }
 
-    http_request(conf.ae.id, parent, 'post', '2', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(conf.ae.id, parent, 'post', '2', bodyString, function (rsc, res_body) {
+        callback(rsc, res_body);
     });
 };
 
 exports.rtvae = function (target, callback) {
-    http_request(conf.ae.id, target, 'get', '', '', function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(conf.ae.id, target, 'get', '', '', function (rsc, res_body) {
+        callback(rsc, res_body);
     });
 };
 
@@ -141,21 +146,21 @@ exports.udtae = function (target, callback) {
         bodyString = JSON.stringify(results_ae);
     }
 
-    http_request(conf.ae.id, target, 'put', '', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request(conf.ae.id, target, 'put', '', bodyString, function (rsc, res_body) {
+        callback(rsc, res_body);
     });
 };
 
 
 exports.delae = function (target, callback) {
-    http_request('Superman', target, 'delete', '', '', function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request('Superman', target, 'delete', '', '', function (rsc, res_body) {
+        callback(rsc, res_body);
     });
 };
 
 exports.del_resource = function (target, callback) {
-    http_request('Superman', target, 'delete', '', '', function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body);
+    http_request('Superman', target, 'delete', '', '', function (rsc, res_body) {
+        callback(rsc, res_body);
     });
 };
 
@@ -177,19 +182,19 @@ exports.crtct = function(parent, rn, count, callback) {
         console.log(bodyString);
     }
 
-    http_request(conf.ae.id, parent, 'post', '3', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request(conf.ae.id, parent, 'post', '3', bodyString, function (rsc, res_body) {
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + rsc + ' <----');
         console.log(res_body);
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+        callback(rsc, res_body, count);
     });
 };
 
 
 exports.rtvct = function(target, count, callback) {
-    http_request(conf.ae.id, target, 'get', '', '', function (res, res_body) {
-//        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request(conf.ae.id, target, 'get', '', '', function (rsc, res_body) {
+//        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + rsc + ' <----');
 //        console.log(res_body);
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+        callback(rsc, res_body, count);
     });
 };
 
@@ -207,17 +212,17 @@ exports.udtct = function(target, lbl, count, callback) {
         bodyString = JSON.stringify(results_ct);
     }
 
-    http_request(conf.ae.id, target, 'put', '', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request(conf.ae.id, target, 'put', '', bodyString, function (rsc, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + rsc + ' <----');
+        callback(rsc, res_body, count);
     });
 };
 
 
 exports.delct = function(target, count, callback) {
-    http_request('Superman', target, 'delete', '', '', function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+    http_request('Superman', target, 'delete', '', '', function (rsc, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + rsc + ' <----');
+        callback(rsc, res_body, count);
     });
 };
 
@@ -240,18 +245,18 @@ exports.crtsub = function(parent, rn, nu, count, callback) {
         console.log(bodyString);
     }
 
-    http_request(conf.ae.id, parent, 'post', '23', bodyString, function (res, res_body) {
-        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request(conf.ae.id, parent, 'post', '23', bodyString, function (rsc, res_body) {
+        console.log(count + ' - ' + parent + '/' + rn + ' - x-m2m-rsc : ' + rsc + ' <----');
         console.log(JSON.stringify(res_body));
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+        callback(rsc, res_body, count);
     });
 };
 
 exports.delsub = function(target, count, callback) {
-    http_request('Superman', target, 'delete', '', '', function (res, res_body) {
-        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + res.headers['x-m2m-rsc'] + ' <----');
+    http_request('Superman', target, 'delete', '', '', function (rsc, res_body) {
+        console.log(count + ' - ' + target + ' - x-m2m-rsc : ' + rsc + ' <----');
         console.log(res_body);
-        callback(res.headers['x-m2m-rsc'], res_body, count);
+        callback(rsc, res_body, count);
     });
 };
 
@@ -272,8 +277,8 @@ exports.crtci = function(parent, count, content, socket, callback) {
         //console.log(bodyString);
     }
 
-    http_request(conf.ae.id, parent, 'post', '4', bodyString, function (res, res_body) {
-        callback(res.headers['x-m2m-rsc'], res_body, parent, socket);
+    http_request(conf.ae.id, parent, 'post', '4', bodyString, function (rsc, res_body) {
+        callback(rsc, res_body, parent, socket);
     });
 };
 
