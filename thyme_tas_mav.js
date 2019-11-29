@@ -267,9 +267,9 @@ function dji_handler(data) {
     // #2 MAVLINK_MSG_ID_GPS_RAW_INT
     params.time_usec = dji.timestamp;
     params.fix_type = 3;
-    params.lat = dji.lat * 1E7;
-    params.lon = dji.lon * 1E7;
-    params.alt = dji.alt;
+    params.lat = parseFloat(dji.lat) * 1E7;
+    params.lon = parseFloat(dji.lon) * 1E7;
+    params.alt = parseFloat(dji.alt) * 1000;
     params.eph = 175;
     params.epv = 270;
     params.vel = 7;
@@ -294,9 +294,9 @@ function dji_handler(data) {
 
     // #4 MAVLINK_MSG_ID_GLOBAL_POSITION_INT
     params.time_boot_ms = dji.timestamp;
-    params.lat = dji.lat * 1E7;
-    params.lon = dji.lon * 1E7;
-    params.alt = dji.alt;
+    params.lat = parseFloat(dji.lat) * 1E7;
+    params.lon = parseFloat(dji.lon) * 1E7;
+    params.alt = parseFloat(dji.alt) * 1000;
     params.relative_alt = dji.relative_alt;
     params.vx = dji.vx;
     params.vy = dji.vy;
