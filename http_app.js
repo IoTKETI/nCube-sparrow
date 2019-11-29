@@ -344,6 +344,7 @@ function retrieve_my_cnt_name(callback) {
             callback();
         }
         else {
+            console.log('x-m2m-rsc : ' + rsc + ' <----' + res_body);
             setTimeout(http_watchdog, 2000);
         }
     });
@@ -369,6 +370,10 @@ function http_watchdog() {
                 sh_state = 'rtvae';
 
                 setTimeout(http_watchdog, 100);
+            }
+            else {
+                console.log('x-m2m-rsc : ' + status + ' <----');
+                setTimeout(http_watchdog, 2500);
             }
         });
     }
@@ -396,7 +401,7 @@ function http_watchdog() {
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
-                setTimeout(http_watchdog, 1000);
+                setTimeout(http_watchdog, 2500);
             }
         });
     }
@@ -409,7 +414,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         create_cnt_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 1000);
+                setTimeout(http_watchdog, 2500);
             }
             else {
                 request_count = ++count;
@@ -428,7 +433,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         delete_sub_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 1000);
+                setTimeout(http_watchdog, 2500);
             }
             else {
                 request_count = ++count;
@@ -447,7 +452,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         create_sub_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 1000);
+                setTimeout(http_watchdog, 2500);
             }
             else {
                 request_count = ++count;
