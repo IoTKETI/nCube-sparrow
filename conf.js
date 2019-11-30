@@ -133,19 +133,4 @@ conf.cnt = cnt_arr;
 conf.sub = sub_arr;
 conf.acp = acp;
 
-conf.serial_list = {};
-
-conf.serial_list.mav = {};
-conf.serial_list.mav.port = '/dev/ttyAMA0';
-conf.serial_list.mav.baudrate = 57600;
-
-conf.serial_list.lte = {};
-conf.serial_list.lte.port = '/dev/ttyUSB1';
-conf.serial_list.lte.baudrate = 115200;
-
-conf.serial_list.sec = {};
-conf.serial_list.sec.port = '/dev/ttyUSB3';
-conf.serial_list.sec.baudrate = 115200;
-
-
 module.exports = conf;

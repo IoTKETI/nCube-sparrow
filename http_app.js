@@ -24,7 +24,7 @@ var moment = require('moment');
 
 global.sh_adn = require('./http_adn');
 var noti = require('./noti');
-var tas = require('./thyme_tas_mav');
+var tas_mav = require('./thyme_tas_mav');
 var tas_sec = require('./thyme_tas_sec');
 
 var HTTP_SUBSCRIPTION_ENABLE = 0;
@@ -48,6 +48,8 @@ global.Res_auth = '';
 global.Result_auth = '';
 global.Certification = '';
 
+const retry_interval = 2500;
+const normal_interval = 100;
 
 global.authResult = 'yet';
 
@@ -333,20 +335,19 @@ function retrieve_my_cnt_name(callback) {
 
                 sh_state = 'crtct';
 
-                setTimeout(http_watchdog, 100);
+                setTimeout(http_watchdog, normal_interval);
             }
             else {
                 sh_state = 'crtci';
 
-                setTimeout(http_watchdog, 100);
+                setTimeout(http_watchdog, normal_interval);
             }
 
             callback();
         }
         else {
             console.log('x-m2m-rsc : ' + rsc + ' <----' + res_body);
-            setTimeout(http_watchdog, 2500);
-            callback();
+            setTimeout(http_watchdog, retry_interval);
         }
     });
 }
@@ -363,18 +364,18 @@ function http_watchdog() {
                     request_count = 0;
                     return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(http_watchdog, normal_interval);
                 });
             }
             else if (status == 5106 || status == 4105) {
                 console.log('x-m2m-rsc : ' + status + ' <----');
                 sh_state = 'rtvae';
 
-                setTimeout(http_watchdog, 100);
+                setTimeout(http_watchdog, normal_interval);
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
-                setTimeout(http_watchdog, 2500);
+                setTimeout(http_watchdog, retry_interval);
             }
         });
     }
@@ -397,12 +398,12 @@ function http_watchdog() {
                     request_count = 0;
                     return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(http_watchdog, normal_interval);
                 }
             }
             else {
                 console.log('x-m2m-rsc : ' + status + ' <----');
-                setTimeout(http_watchdog, 2500);
+                setTimeout(http_watchdog, retry_interval);
             }
         });
     }
@@ -415,7 +416,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         create_cnt_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 2500);
+                setTimeout(http_watchdog, retry_interval);
             }
             else {
                 request_count = ++count;
@@ -425,7 +426,7 @@ function http_watchdog() {
                     request_count = 0;
                     return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(http_watchdog, normal_interval);
                 }
             }
         });
@@ -434,7 +435,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         delete_sub_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 2500);
+                setTimeout(http_watchdog, retry_interval);
             }
             else {
                 request_count = ++count;
@@ -444,7 +445,7 @@ function http_watchdog() {
                     request_count = 0;
                     return_count = 0;
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(http_watchdog, normal_interval);
                 }
             }
         });
@@ -453,7 +454,7 @@ function http_watchdog() {
         console.log('[sh_state] : ' + sh_state);
         create_sub_all(request_count, function (status, count) {
             if(status == 9999) {
-                setTimeout(http_watchdog, 2500);
+                setTimeout(http_watchdog, retry_interval);
             }
             else {
                 request_count = ++count;
@@ -463,10 +464,10 @@ function http_watchdog() {
 
                     ready_for_notification();
 
-                    tas.ready();
+                    tas_mav.ready();
                     tas_sec.ready();
 
-                    setTimeout(http_watchdog, 100);
+                    setTimeout(http_watchdog, normal_interval);
                 }
             }
         });
@@ -476,7 +477,7 @@ function http_watchdog() {
     }
 }
 
-setTimeout(http_watchdog, 100);
+setTimeout(http_watchdog, normal_interval);
 
 function check_rtv_cnt() {
     sh_state = 'rtvct';
@@ -536,11 +537,7 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
 
     mqtt_client.on('message', function (topic, message) {
         if(topic == gcs_noti_topic) {
-            if (mavPort != null) {
-                if (mavPort.isOpen) {
-                    mavPort.write(message);
-                }
-            }
+            tas_mav.gcs_noti_handler(message);
         }
         else {
             if(topic.includes('/oneM2M/req/')) {

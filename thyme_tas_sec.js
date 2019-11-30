@@ -27,8 +27,14 @@ var t_count = 0;
 
 global.secPort = null;
 
+var secPortNum = '/dev/ttyUSB3';
+var secBaudrate = 115200;
+
 exports.ready = function tas_ready() {
     if(my_secure === 'on') {
+        secPortNum = '/dev/ttyUSB3';
+        secBaudrate = 115200;
+
         secPortOpening();
     }
 };
@@ -46,8 +52,8 @@ var SerialPort = require('serialport');
 
 function secPortOpening() {
     if (secPort == null) {
-        secPort = new SerialPort(conf.serial_list.sec.port, {
-            baudRate: parseInt(conf.serial_list.sec.baudrate, 10),
+        secPort = new SerialPort(secPortNum, {
+            baudRate: parseInt(secBaudrate, 10),
         });
 
         secPort.on('open', secPortOpen);
@@ -66,7 +72,7 @@ function secPortOpening() {
 }
 
 function secPortOpen() {
-    console.log('secPort open. ' + conf.serial_list.sec.port + ' Data rate: ' + secPort.settings.baudRate);
+    console.log('secPort open. ' + secPortNum + ' Data rate: ' + secBaudrate);
 
     triggerSec();
 }

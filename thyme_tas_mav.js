@@ -30,11 +30,17 @@ var t_count = 0;
 var _this = this;
 
 var _server = null;
-global.mavPort = null;
+
+var mavPort = null;
 var ltePort = null;
 var missionPort = null;
-var missionPortNum = '/dev/ttyUSB5';
-var missionBaudrate = '115200';
+
+var mavPortNum = '/dev/ttyUSB5';
+var mavBaudrate = '57600';
+var ltePortNum = '/dev/ttyUSB1';
+var lteBaudrate = '115200';
+var missionPortNum = '/dev/ttyUSB3';
+var missionBaudrate = '57600';
 
 exports.ready = function tas_ready() {
     if (_server == null) {
@@ -62,9 +68,13 @@ exports.ready = function tas_ready() {
             });
         }
         else if(my_drone_type === 'pixhawk') {
+            mavPortNum = '/dev/ttyUSB5';
+            mavBaudrate = '57600';
             mavPortOpening();
         }
 
+        ltePortNum = '/dev/ttyUSB1';
+        lteBaudrate = '115200';
         ltePortOpening();
 
         if(my_mission_name == 'h2battery') {
@@ -323,12 +333,20 @@ exports.noti = function (path_arr, cinObj, socket) {
     }
 };
 
+exports.gcs_noti_handler = function (message) {
+    if (mavPort != null) {
+        if (mavPort.isOpen) {
+            mavPort.write(message);
+        }
+    }
+};
+
 var SerialPort = require('serialport');
 
 function mavPortOpening() {
     if (mavPort == null) {
-        mavPort = new SerialPort(conf.serial_list.mav.port, {
-            baudRate: parseInt(conf.serial_list.mav.baudrate, 10),
+        mavPort = new SerialPort(mavPortNum, {
+            baudRate: parseInt(mavBaudrate, 10),
         });
 
         mavPort.on('open', mavPortOpen);
@@ -347,7 +365,7 @@ function mavPortOpening() {
 }
 
 function mavPortOpen() {
-    console.log('mavPort open. ' + conf.serial_list.mav.port + ' Data rate: ' + mavPort.settings.baudRate);
+    console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
 }
 
 function mavPortClose() {
@@ -659,8 +677,8 @@ function parseMav(mavPacket) {
 
 function ltePortOpening() {
     if (ltePort == null) {
-        ltePort = new SerialPort(conf.serial_list.lte.port, {
-            baudRate: parseInt(conf.serial_list.lte.baudrate, 10)
+        ltePort = new SerialPort(ltePortNum, {
+            baudRate: parseInt(lteBaudrate, 10)
         });
 
         ltePort.on('open', ltePortOpen);
@@ -679,7 +697,7 @@ function ltePortOpening() {
 }
 
 function ltePortOpen() {
-    console.log('ltePort open. ' + conf.serial_list.lte.port + ' Data rate: ' + ltePort.settings.baudRate);
+    console.log('ltePort open. ' + ltePortNum + ' Data rate: ' + lteBaudrate);
 }
 
 function ltePortClose() {
