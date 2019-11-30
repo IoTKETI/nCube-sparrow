@@ -26,6 +26,8 @@ global.sh_adn = require('./http_adn');
 var noti = require('./noti');
 var tas_mav = require('./thyme_tas_mav');
 var tas_sec = require('./thyme_tas_sec');
+var tas_mission = require('./thyme_tas_mission');
+
 
 var HTTP_SUBSCRIPTION_ENABLE = 0;
 var MQTT_SUBSCRIPTION_ENABLE = 0;
@@ -316,38 +318,16 @@ function retrieve_my_cnt_name(callback) {
                 my_secure = 'off';
             }
 
-
-            //info.parent = '/Mobius/UTM_UVARC/GCS_Data';
-            //info.name = drone_info.drone;
-            //conf.cnt.push(JSON.parse(JSON.stringify(info)));
-
-            // info.parent = '/Mobius/UTM_UVARC/GCS_Data/' + drone_info.drone;
-            // info.name = 'sub-' + conf.ae.name;
-            // info.nu = 'mqtt://' + conf.cse.host + '/' + conf.ae.appid + '?ct=json';
-            // conf.sub.push(JSON.parse(JSON.stringify(info)));
-
-            if(pre_my_cnt_name != my_cnt_name) {
-                pre_my_cnt_name = my_cnt_name;
-
-                gcs_noti_topic = '/Mobius/' + my_gcs_name + '/GCS_Data';
-
-                MQTT_SUBSCRIPTION_ENABLE = 1;
-
-                sh_state = 'crtct';
-
-                setTimeout(http_watchdog, normal_interval);
-            }
-            else {
-                sh_state = 'crtci';
-
-                setTimeout(http_watchdog, normal_interval);
-            }
-
+            gcs_noti_topic = '/Mobius/' + my_gcs_name + '/GCS_Data/' + drone_info.drone;
+            MQTT_SUBSCRIPTION_ENABLE = 1;
+            sh_state = 'crtct';
+            setTimeout(http_watchdog, normal_interval);
             callback();
         }
         else {
             console.log('x-m2m-rsc : ' + rsc + ' <----' + res_body);
             setTimeout(http_watchdog, retry_interval);
+            callback();
         }
     });
 }
@@ -466,6 +446,7 @@ function http_watchdog() {
 
                     tas_mav.ready();
                     tas_sec.ready();
+                    tas_mission.ready();
 
                     setTimeout(http_watchdog, normal_interval);
                 }

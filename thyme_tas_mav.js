@@ -19,70 +19,54 @@ var moment = require('moment');
 
 var mavlink = require('./mavlibrary/mavlink.js');
 
-var socket_arr = {};
-exports.socket_arr = socket_arr;
-
-var tas_buffer = {};
-exports.buffer = tas_buffer;
-
-var t_count = 0;
-
-var _this = this;
-
 var _server = null;
 
 var mavPort = null;
 var ltePort = null;
-var missionPort = null;
 
 var mavPortNum = '/dev/ttyUSB5';
 var mavBaudrate = '57600';
 var ltePortNum = '/dev/ttyUSB1';
 var lteBaudrate = '115200';
-var missionPortNum = '/dev/ttyUSB3';
-var missionBaudrate = '57600';
 
 exports.ready = function tas_ready() {
-    if (_server == null) {
-        if(my_drone_type === 'dji') {
+    if(my_drone_type === 'dji') {
+        if (_server == null) {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
                 socket.id = Math.random() * 1000;
-                tas_buffer[socket.id] = '';
+
                 socket.on('data', dji_handler);
+
                 socket.on('end', function () {
                     console.log('end');
                 });
+
                 socket.on('close', function () {
                     console.log('close');
                 });
+
                 socket.on('error', function (e) {
                     console.log('error ', e);
                 });
             });
-
-            _server.listen(conf.ae.tas_mav_port, function () {
-                console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
-
-                setTimeout(dji_sdk_lunch, 1500);
-            });
-        }
-        else if(my_drone_type === 'pixhawk') {
-            mavPortNum = '/dev/ttyUSB5';
-            mavBaudrate = '57600';
-            mavPortOpening();
         }
 
-        ltePortNum = '/dev/ttyUSB1';
-        lteBaudrate = '115200';
-        ltePortOpening();
+        _server.listen(conf.ae.tas_mav_port, function () {
+            console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
 
-        if(my_mission_name == 'h2battery') {
-            missionPortNum = '/dev/ttyUSB3';
-            missionBaudrate = '57600';
-            missionPortOpening();
-        }
+            setTimeout(dji_sdk_lunch, 1500);
+        });
     }
+    else if(my_drone_type === 'pixhawk') {
+        mavPortNum = '/dev/ttyUSB5';
+        mavBaudrate = '57600';
+        mavPortOpening();
+    }
+
+    ltePortNum = '/dev/ttyUSB1';
+    lteBaudrate = '115200';
+    ltePortOpening();
 };
 
 var spawn = require('child_process').spawn;
@@ -136,7 +120,6 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
         }, gap, topic);
     }
 }
-
 
 function mavlinkGenerateMessage(type, params) {
     var TEST_GEN_MAVLINK_SYSTEM_ID = 8;
@@ -324,11 +307,6 @@ exports.noti = function (path_arr, cinObj, socket) {
         console.log('---- is not cin message');
     }
     else {
-        //console.log(JSON.stringify(cin));
-        //        console.log(socket_arr);
-        //        console.log(path_arr);
-        //console.log('<---- send to tas - ' + cin.con);
-
         socket.write(JSON.stringify(cin));
     }
 };
@@ -371,7 +349,7 @@ function mavPortOpen() {
 function mavPortClose() {
     console.log('mavPort closed.');
 
-    mavPortOpening();
+    setTimeout(mavPortOpening, 2000);
 }
 
 function mavPortError(error) {
@@ -698,12 +676,14 @@ function ltePortOpening() {
 
 function ltePortOpen() {
     console.log('ltePort open. ' + ltePortNum + ' Data rate: ' + lteBaudrate);
+
+    setInterval(lteReqGetRssi, 2000);
 }
 
 function ltePortClose() {
     console.log('ltePort closed.');
 
-    ltePortOpening();
+    setTimeout(ltePortOpening, 2000);
 }
 
 function ltePortError(error) {
@@ -728,8 +708,6 @@ function lteReqGetRssi() {
         }
     }
 }
-
-setInterval(lteReqGetRssi, 2000);
 
 var count = 0;
 var strRssi = '';
@@ -805,204 +783,3 @@ function sendLteRssi(gpi) {
     });
 }
 
-function missionPortOpening() {
-    if (missionPort == null) {
-        missionPort = new SerialPort(missionPortNum, {
-            baudRate: parseInt(missionBaudrate, 10),
-        });
-
-        missionPort.on('open', missionPortOpen);
-        missionPort.on('close', missionPortClose);
-        missionPort.on('error', missionPortError);
-        missionPort.on('data', missionPortData);
-    }
-    else {
-        if (missionPort.isOpen) {
-
-        }
-        else {
-            missionPort.open();
-        }
-    }
-}
-
-function missionPortOpen() {
-    console.log('missionPort open. ' + missionPortNum + ' Data rate: ' + missionBaudrate);
-}
-
-function missionPortClose() {
-    console.log('missionPort closed.');
-
-    missionPortOpening();
-}
-
-function missionPortError(error) {
-    var error_str = error.toString();
-    console.log('[missionPort error]: ' + error.message);
-    if (error_str.substring(0, 14) == "Error: Opening") {
-
-    }
-    else {
-        console.log('missionPort error : ' + error);
-    }
-
-    setTimeout(missionPortOpening, 2000);
-}
-
-var missionStr = '';
-function missionPortData(data) {
-    if(my_mission_name == 'h2battery') {
-        missionStr += data.toString();
-
-        //console.log(missionStr);
-
-        if(missionStr[missionStr.length-1] == '\n') {
-            var missionPacket = missionStr.substr(0, missionStr.length);
-
-            //missionPacket.replace(/\'\u0000\n\'/g, '\n');
-            missionPacket = missionPacket.replace(/ /g, '');
-            var missionPacketArr = missionPacket.split('\n');
-            var missionStrArr = missionPacketArr[1].split('\t');
-
-//            console.log(missionPacketArr[1]);
-//            console.log(missionStrArr);
-
-            setTimeout(parseMission, 0, missionStrArr);
-            missionStr = missionStr.substr(0, missionStr.length);
-        }
-
-        /*if(missionStr.length >= 88) {
-            var missionPacket = '';
-            var start = 0;
-            var refLen = 0;
-            var lenCount = 0;
-            for (var i = 0; i < missionStr.length; i += 2) {
-                var head = missionStr.substr(0, 2);
-                var tail = missionStr.substr(86, 2);
-
-                if(head == 'fe' && tail == 'ff') {
-                    missionPacket = missionStr.substr(0, 88);
-                    console.log('Parse Mission  - ' + missionPacket);
-                    setTimeout(parseMission, 0, missionPacket);
-                    missionStr = missionStr.substr(88);
-                    i = -2;
-                    if (missionStr.length <= 88) {
-                        break;
-                    }
-                }
-                else {
-                    missionStr = missionStr.substr(i + 2);
-                    i = -2;
-                    if (missionStr.length <= 88) {
-                        break;
-                    }
-                }
-            }
-        }*/
-    }
-}
-
-var mission = {};
-
-function parseMission(missionPacket) {
-    if(my_mission_name == 'h2battery') {
-        mission.H2BATTERY = {};
-
-        var h2 = parseFloat(missionPacket[1], 10);
-        var output_voltage = parseFloat(missionPacket[2], 10);
-        var output_current = parseFloat(missionPacket[3], 10);
-        var battery_voltage = parseFloat(missionPacket[4], 10);
-        var battery_current = parseFloat(missionPacket[5], 10);
-        var powerpack_state = parseInt(missionPacket[6], 10);
-        var error_code = parseInt(missionPacket[7], 10);
-        var powerpack_temp = parseFloat(missionPacket[8], 10);
-        var fuelcell1_voltage = parseFloat(missionPacket[9], 10);
-        var fuelcell1_temp1 = parseFloat(missionPacket[10], 10);
-        var fuelcell1_temp2 = parseFloat(missionPacket[11], 10);
-        var fuelcell1_current = parseFloat(missionPacket[12], 10);
-        var fuelcell2_voltage = parseFloat(missionPacket[16], 10);
-        var fuelcell2_temp1 = parseFloat(missionPacket[17], 10);
-        var fuelcell2_temp2 = parseFloat(missionPacket[18], 10);
-        var fuelcell2_current = parseFloat(missionPacket[19], 10);
-
-        /*
-                var base_offset = 10;
-                var decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var h2 = decimal / 10;
-
-                base_offset = 14;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var output_voltage = decimal / 100;
-
-                base_offset = 18;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var output_current = decimal / 100;
-
-                base_offset = 22;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var battery_voltage = decimal / 100;
-
-                base_offset = 26;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var battery_current = decimal / 100;
-
-                base_offset = 34;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var powerpack_temp = decimal / 10 - 40;
-
-                base_offset = 38;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell1_voltage = decimal / 10;
-
-                base_offset = 42;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell1_temp1 = decimal / 10 - 40;
-
-                base_offset = 46;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell1_temp2 = decimal / 10 - 40;
-
-                base_offset = 50;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell1_current = decimal / 100;
-
-                base_offset = 62;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell2_voltage = decimal / 10;
-
-                base_offset = 66;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell2_temp1 = decimal / 10 - 40;
-
-                base_offset = 70;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell2_temp2 = decimal / 10 - 40;
-
-                base_offset = 74;
-                decimal = parseInt(missionPacket.substr(base_offset, 2), 16) * 100 + parseInt(missionPacket.substr(base_offset + 2, 2), 16);
-                var fuelcell2_current = decimal / 100;
-        */
-        //console.log(mavPacket);
-        mission.H2BATTERY.h2 = h2;
-        mission.H2BATTERY.output_voltage = output_voltage;
-        mission.H2BATTERY.output_current = output_current;
-        mission.H2BATTERY.battery_voltage = battery_voltage;
-        mission.H2BATTERY.battery_current = battery_current;
-
-        mission.H2BATTERY.powerpack_state = powerpack_state;
-        mission.H2BATTERY.error_code = error_code;
-        mission.H2BATTERY.powerpack_temp = powerpack_temp;
-
-        mission.H2BATTERY.fuelcell1_voltage = fuelcell1_voltage;
-        mission.H2BATTERY.fuelcell1_temp1 = fuelcell1_temp1;
-        mission.H2BATTERY.fuelcell1_temp2 = fuelcell1_temp2;
-        mission.H2BATTERY.fuelcell1_current = fuelcell1_current;
-
-        mission.H2BATTERY.fuelcell2_voltage = fuelcell2_voltage;
-        mission.H2BATTERY.fuelcell2_temp1 = fuelcell2_temp1;
-        mission.H2BATTERY.fuelcell2_temp2 = fuelcell2_temp2;
-        mission.H2BATTERY.fuelcell2_current = fuelcell2_current;
-
-        send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, mission, 1500);
-    }
-}
