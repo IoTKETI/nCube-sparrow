@@ -23,5 +23,5 @@ $ sudo nano /etc/xdg/lxsession/LXDE-pi/autostart
 
 Add executable code to last line
 
-$ sh /home/pi/DJI-sparrow/auto.sh > /home/pi/DJI-sparrow/auto.sh.log 2>&1
+$ sh /home/pi/auto.sh > /home/pi/auto.sh.log 2>&1
 ```
