@@ -297,6 +297,13 @@ function retrieve_my_cnt_name(callback) {
                 my_mission_name = '';
             }
 
+            if(my_mission_name === 'micro') {
+                info.parent = my_mission_parent + '/' + my_mission_name;
+                info.name = 'sub_micro';
+                info.nu = 'mqtt://' + conf.cse.host + '/' + conf.ae.id + '?ct=json';
+                conf.sub.push(JSON.parse(JSON.stringify(info)));
+            }
+
             if(drone_info.hasOwnProperty('mav_ver')) {
                 mav_ver = drone_info.mav_ver;
             }

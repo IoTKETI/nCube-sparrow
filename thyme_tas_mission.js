@@ -26,6 +26,11 @@ exports.ready = function tas_ready() {
         missionBaudrate = '57600';
         missionPortOpening();
     }
+    else if(my_mission_name == 'micro') {
+        missionPortNum = '/dev/ttyUSB3';
+        missionBaudrate = '9600';
+        missionPortOpening();
+    }
 };
 
 var aggr_content = {};
@@ -251,3 +256,14 @@ function parseMission(missionPacket) {
         send_aggr_to_Mobius(my_mission_parent + '/' + my_mission_name, mission, 1000);
     }
 }
+
+exports.request_to_mission = function() {
+    if(my_mission_name == 'micro') {
+        if (missionPort != null) {
+            if (missionPort.isOpen) {
+                console.log('Request to Mission');
+                missionPort.write(Buffer.from('A203010100000000000000A3'));
+            }
+        }
+    }
+};
