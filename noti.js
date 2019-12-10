@@ -143,7 +143,7 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj) {
                                 }
                                 else if (path_arr[path_arr.length - 2] === 'micro') {
                                     console.log(cinObj);
-                                    tas_mission.request_to_mission();
+                                    tas_mission.request_to_mission(cinObj);
                                 }
                                 break;
                             }

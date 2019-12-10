@@ -257,12 +257,40 @@ function parseMission(missionPacket) {
     }
 }
 
-exports.request_to_mission = function() {
+exports.request_to_mission = function(cinObj) {
     if(my_mission_name == 'micro') {
         if (missionPort != null) {
             if (missionPort.isOpen) {
-                console.log('Request to Mission');
-                missionPort.write(Buffer.from('A203010100000000000000A3'));
+                var con = cinObj.con;
+                console.log(con);
+
+                var con_arr = con.split(',');
+
+                var msdata = [];
+                if(con_arr.length >= 2) {
+                    if(parseInt(con_arr[0], 10) < 8 && parseInt(con_arr[1], 10) < 8) {
+                        var stx = 'A2';
+                        var command = '030' + con_arr[0] + '0' + con_arr[1] + '000000000000';
+                        var crc = 0;
+                        for(var i = 0; i < command.length; i += 2) {
+                            crc ^= parseInt(command.substr(i, 2), 16);
+                        }
+
+                        if(crc < 16) {
+                            command += '0' + crc.toString().toString('hex');
+                        }
+                        else {
+                            command += crc.toString().toString('hex');
+                        }
+
+                        var etx = 'A3';
+                        command = stx + command + etx;
+                        console.log(command);
+                        msdata = Buffer.from(command, 'hex');
+                        console.log(msdata);
+                        missionPort.write(msdata);
+                    }
+                }
             }
         }
     }
