@@ -24,7 +24,7 @@ var _server = null;
 var mavPort = null;
 var ltePort = null;
 
-var mavPortNum = '/dev/ttyUSB5';
+var mavPortNum = '/dev/ttyAMA0';
 var mavBaudrate = '57600';
 var ltePortNum = '/dev/ttyUSB1';
 var lteBaudrate = '115200';
