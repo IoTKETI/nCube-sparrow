@@ -21,6 +21,7 @@ var mavlink = require('./mavlibrary/mavlink.js');
 
 var _server = null;
 
+var socket_mav = null;
 var mavPort = null;
 var ltePort = null;
 
@@ -219,6 +220,8 @@ var dji = {};
 var params = {};
 
 function dji_handler(data) {
+    socket_mav = this;
+    
     var data_arr = data.toString().split(',');
 
     dji.flightstatus = data_arr[0].replace('[', '');
@@ -312,9 +315,14 @@ exports.noti = function (path_arr, cinObj, socket) {
 };
 
 exports.gcs_noti_handler = function (message) {
-    if (mavPort != null) {
-        if (mavPort.isOpen) {
-            mavPort.write(message);
+    if(my_drone_type === 'dji') {
+        socket_mav.write(message);
+    }
+    else if(my_drone_type === 'pixhawk') {
+        if (mavPort != null) {
+            if (mavPort.isOpen) {
+                mavPort.write(message);
+            }
         }
     }
 };
