@@ -19,6 +19,42 @@ var moment = require('moment');
 
 var mavlink = require('./mavlibrary/mavlink.js');
 
+// I2C
+var bus = 3;
+var i2c = require('i2c-bus'),
+    i2cBus = i2c.openSync(bus),
+    oled = require('oled-i2c-bus');
+var font = require('oled-font-5x7');
+var sleep = require('system-sleep');
+
+const SIZE_X=128,
+      SIZE_Y=32;
+
+var opts = {
+  width: SIZE_X,
+  height: SIZE_Y,
+  address: 0x3c
+};
+
+try {
+  var oled = new oled(i2cBus, opts);
+
+  oled.clearDisplay();
+  oled.turnOnDisplay();
+
+  oled.drawPixel([
+    [SIZE_X-0, 0, 0],
+    [SIZE_X-0, SIZE_Y-0, 0],
+    [0, SIZE_Y-0, 0],
+    [0, 0, 0]
+  ]);
+}
+catch(err) {
+  // Print an error message and terminate the application
+  console.log(err.message);
+  process.exit(1);
+}
+    
 var _server = null;
 
 var socket_mav = null;
@@ -30,32 +66,39 @@ var mavBaudrate = '57600';
 var ltePortNum = '/dev/ttyUSB1';
 var lteBaudrate = '115200';
 
+displayMsg('Start thyme_tas_mav.js');
+
 exports.ready = function tas_ready() {
+	displayMsg('My Drone Type:\n' + my_drone_type);
     if(my_drone_type === 'dji') {
         if (_server == null) {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
+                displayMsg('DJI Port(' + mavPortNum + ') Open.\n' + 'Data rate: 115200');
                 socket.id = Math.random() * 1000;
 
                 socket.on('data', dji_handler);
 
                 socket.on('end', function () {
                     console.log('end');
+                    displayMsg('DJI Port End.');
                 });
 
                 socket.on('close', function () {
                     console.log('close');
+                    displayMsg('DJI Port Closed.');
                 });
 
                 socket.on('error', function (e) {
                     console.log('error ', e);
+                    displayMsg('DJI Port Error: ' + e);
                 });
             });
         }
 
         _server.listen(conf.ae.tas_mav_port, function () {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
-
+			displayMsg('TCP Server is listening...');
             setTimeout(dji_sdk_lunch, 1500);
         });
     }
@@ -114,7 +157,7 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
 
         setTimeout(function () {
             sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
-
+			displayMsg('Send Drone Data to ' + topic);
             });
 
             delete aggr_content[topic];
@@ -317,11 +360,13 @@ exports.noti = function (path_arr, cinObj, socket) {
 exports.gcs_noti_handler = function (message) {
     if(my_drone_type === 'dji') {
         socket_mav.write(message);
+        displayMsg('DJI Mission : ' + message);
     }
     else if(my_drone_type === 'pixhawk') {
         if (mavPort != null) {
             if (mavPort.isOpen) {
                 mavPort.write(message);
+                displayMsg('pixhawk Mission : ' + message);
             }
         }
     }
@@ -352,22 +397,26 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
+	displayMsg('Pixhawk Port(' + mavPortNum + ') Open\n' + 'Data rate: ' + mavBaudrate);
+
 }
 
 function mavPortClose() {
     console.log('mavPort closed.');
-
+	displayMsg('Pixhawk Port Closed.');
     setTimeout(mavPortOpening, 2000);
 }
 
 function mavPortError(error) {
     var error_str = error.toString();
     console.log('[mavPort error]: ' + error.message);
+    displayMsg('[mavPort error]: ' + error.message);
     if (error_str.substring(0, 14) == "Error: Opening") {
 
     }
     else {
-        console.log('mavPort error : ' + error);
+        console.log('Pixhawk Port error : ' + error);
+        displayMsg('Pixhawk Port Error: ' + error);
     }
 
     setTimeout(mavPortOpening, 2000);
@@ -684,19 +733,21 @@ function ltePortOpening() {
 
 function ltePortOpen() {
     console.log('ltePort open. ' + ltePortNum + ' Data rate: ' + lteBaudrate);
+    //displayMsg('LTE Port(' + ltePortNum + ') Open\n' + 'Data Rate: ' + lteBaudrate);
 
     setInterval(lteReqGetRssi, 2000);
 }
 
 function ltePortClose() {
     console.log('ltePort closed.');
-
+	displayMsg('LTE Port Closed');
     setTimeout(ltePortOpening, 2000);
 }
 
 function ltePortError(error) {
     var error_str = error.toString();
     console.log('[ltePort error]: ' + error.message);
+    displayMsg('[ltePort error]: ' + error.message);
     if (error_str.substring(0, 14) == "Error: Opening") {
 
     }
@@ -791,3 +842,9 @@ function sendLteRssi(gpi) {
     });
 }
 
+function displayMsg(msg) {
+	oled.clearDisplay();
+	oled.setCursor(2, 2);
+	oled.writeString(font, 1, msg, 1, true);
+	sleep(1000);
+}
