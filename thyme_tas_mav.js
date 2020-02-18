@@ -18,6 +18,7 @@ var ip = require('ip');
 var moment = require('moment');
 
 var mavlink = require('./mavlibrary/mavlink.js');
+var fs = require('fs');
 
 // I2C
 var bus = 3;
@@ -66,15 +67,19 @@ var mavBaudrate = '57600';
 var ltePortNum = '/dev/ttyUSB1';
 var lteBaudrate = '115200';
 
+var ae_name = {};
+ae_name = JSON.parse(fs.readFileSync('flight.json', 'utf8'));
+var cnt_name = '';
 displayMsg('Start thyme_tas_mav.js');
 
 exports.ready = function tas_ready() {
-	displayMsg('My Drone Type:\n' + my_drone_type);
+    cnt_name = my_cnt_name.split('/')[4]
+	displayMsg('Drone Type:' + my_drone_type);
     if(my_drone_type === 'dji') {
         if (_server == null) {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
-                displayMsg('DJI Port(' + mavPortNum + ') Open.\n' + 'Data rate: 115200');
+                displayMsg('DJI Port Open:' + mavPortNum + ', 115200');
                 socket.id = Math.random() * 1000;
 
                 socket.on('data', dji_handler);
@@ -157,7 +162,7 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
 
         setTimeout(function () {
             sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
-			displayMsg('Send Drone Data to ' + topic);
+			displayMsg('Send Drone Data..');
             });
 
             delete aggr_content[topic];
@@ -165,7 +170,7 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
     }
 }
 
-function mavlinkGenerateMessage(type, params) {
+function mavlinkGenerateMessage(type, params) { 
     var TEST_GEN_MAVLINK_SYSTEM_ID = 8;
     const mavlinkParser = new MAVLink(null/*logger*/, TEST_GEN_MAVLINK_SYSTEM_ID, 0);
     try {
@@ -397,7 +402,7 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
-	displayMsg('Pixhawk Port(' + mavPortNum + ') Open\n' + 'Data rate: ' + mavBaudrate);
+	displayMsg(mavPortNum + ', ' + mavBaudrate);
 
 }
 
@@ -843,8 +848,10 @@ function sendLteRssi(gpi) {
 }
 
 function displayMsg(msg) {
-	oled.clearDisplay();
-	oled.setCursor(2, 2);
-	oled.writeString(font, 1, msg, 1, true);
-	sleep(1000);
+	// oled.clearDisplay();
+    oled.setCursor(1, 0);
+    var message = ('IP:' + ip.address() + '\n' + ae_name.flight + ',' + cnt_name + '\n' + msg);
+	oled.writeString(font, 1, message, 1, true);
+    sleep(1000);
+    oled.clearDisplay();
 }
