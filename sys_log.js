@@ -43,10 +43,10 @@ try {
     [0, 0, 0]
   ]);
 
-  oled.drawLine(1, 1, SIZE_X-2, 1, 1);
-  oled.drawLine(SIZE_X-2, 1, SIZE_X-2, SIZE_Y-2, 1);
-  oled.drawLine(SIZE_X-2, SIZE_Y-2, 1, SIZE_Y-2, 1);
-  oled.drawLine(1, SIZE_Y-2, 1, 1, 1);
+  // oled.drawLine(1, 1, SIZE_X-2, 1, 1);
+  // oled.drawLine(SIZE_X-2, 1, SIZE_X-2, SIZE_Y-2, 1);
+  // oled.drawLine(SIZE_X-2, SIZE_Y-2, 1, SIZE_Y-2, 1);
+  // oled.drawLine(1, SIZE_Y-2, 1, 1, 1);
 }
 catch(err) {
   // Print an error message and terminate the application
@@ -57,9 +57,9 @@ catch(err) {
 // displayMsg('Start Sparrow Board');
 // sleep(1000)
 // displayMsg('IP: ' + ip.address());
-oled.setCursor(1,1)
+oled.setCursor(1,25)
 oled.writeString(font, 1, 'Start Sparrow Board', 1, true);
-oled.setCursor(1,2)
+oled.setCursor(1,30)
 oled.writeString(font, 1, 'IP: ' + ip.address(), 1, true);
 // displayMsg('IP: ' + ip.address());
 
