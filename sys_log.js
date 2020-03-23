@@ -54,8 +54,12 @@ catch(err) {
   process.exit(1);
 }
 
+// displayMsg('Start Sparrow Board');
+// sleep(1000)
+// displayMsg('IP: ' + ip.address());
+oled.setCursor(1,1)
 displayMsg('Start Sparrow Board');
-sleep(1000)
+oled.setCursor(2,1)
 displayMsg('IP: ' + ip.address());
 
 function displayMsg(msg) {
