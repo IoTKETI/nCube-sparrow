@@ -24,24 +24,14 @@ try {
 
   oled.clearDisplay();
   oled.turnOnDisplay();
-
-  // oled.drawPixel([
-  //   [SIZE_X-0, 0, 0],
-  //   [SIZE_X-0, SIZE_Y-0, 0],
-  //   [0, SIZE_Y-0, 0],
-  //   [0, 0, 0]
-  // ]);
-
+  
+  oled.setCursor(1,10)
+  oled.writeString(font, 1, 'Start Sparrow Board', 1, true);
+  oled.setCursor(1,20)
+  oled.writeString(font, 1, 'IP: ' + ip.address(), 1, true);
 }
 catch(err) {
   // Print an error message and terminate the application
   console.log(err.message);
   process.exit(1);
 }
-
-oled.clearDisplay();
-oled.setCursor(1,10)
-oled.writeString(font, 1, 'Start Sparrow Board', 1, true);
-oled.setCursor(1,20)
-oled.writeString(font, 1, 'IP: ' + ip.address(), 1, true);
-// displayMsg('IP: ' + ip.address());
