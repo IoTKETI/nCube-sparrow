@@ -58,9 +58,10 @@ catch(err) {
 // sleep(1000)
 // displayMsg('IP: ' + ip.address());
 oled.setCursor(1,1)
-displayMsg('Start Sparrow Board');
+oled.writeString(font, 1, 'Start Sparrow Board', 1, true);
 oled.setCursor(1,2)
-displayMsg('IP: ' + ip.address());
+oled.writeString(font, 1, 'IP: ' + ip.address(), 1, true);
+// displayMsg('IP: ' + ip.address());
 
 function displayMsg(msg) {
   // Location fits 128x32 OLED
