@@ -25,12 +25,12 @@ try {
   oled.clearDisplay();
   oled.turnOnDisplay();
 
-  oled.drawPixel([
-    [SIZE_X-0, 0, 0],
-    [SIZE_X-0, SIZE_Y-0, 0],
-    [0, SIZE_Y-0, 0],
-    [0, 0, 0]
-  ]);
+  // oled.drawPixel([
+  //   [SIZE_X-0, 0, 0],
+  //   [SIZE_X-0, SIZE_Y-0, 0],
+  //   [0, SIZE_Y-0, 0],
+  //   [0, 0, 0]
+  // ]);
 
 }
 catch(err) {
