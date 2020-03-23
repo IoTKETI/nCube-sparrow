@@ -1,16 +1,5 @@
-/*
- * clock.js
- * Display a digital clock on a small I2C connected display
- * 
- * 2016-11-28 v1.0 Harald Kubota
- */
-
-
 "use strict";
 
-// NOTE: On newer versions of Raspberry Pi the I2C is set to 1,
-// however on other platforms you may need to adjust if to
-// another value, for example 0.
 var bus = 3;
 
 var i2c = require('i2c-bus'),
@@ -50,19 +39,9 @@ catch(err) {
   process.exit(1);
 }
 
-// displayMsg('Start Sparrow Board');
-// sleep(1000)
-// displayMsg('IP: ' + ip.address());
+oled.clearDisplay();
 oled.setCursor(1,10)
 oled.writeString(font, 1, 'Start Sparrow Board', 1, true);
 oled.setCursor(1,20)
 oled.writeString(font, 1, 'IP: ' + ip.address(), 1, true);
 // displayMsg('IP: ' + ip.address());
-
-function displayMsg(msg) {
-  // Location fits 128x32 OLED
-  oled.clearDisplay();
-  oled.setCursor(4, 12);
-  oled.writeString(font, 1, msg, 1, true);
-}
-
