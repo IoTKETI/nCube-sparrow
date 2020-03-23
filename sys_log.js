@@ -59,7 +59,7 @@ catch(err) {
 // displayMsg('IP: ' + ip.address());
 oled.setCursor(1,1)
 displayMsg('Start Sparrow Board');
-oled.setCursor(2,1)
+oled.setCursor(1,2)
 displayMsg('IP: ' + ip.address());
 
 function displayMsg(msg) {
