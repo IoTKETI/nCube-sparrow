@@ -76,7 +76,7 @@ exports.ready = function tas_ready() {
         if (_server == null) {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
-                oled.setCursor(64,1);
+                oled.setCursor(20,1);
                 oled.writeString(font, 1, mavPortNum + '/115200', 1, true);
                 //displayMsg('DJI Port Open:' + mavPortNum + ', 115200');
                 socket.id = Math.random() * 1000;
