@@ -42,13 +42,6 @@ try {
 
   oled.clearDisplay();
   oled.turnOnDisplay();
-
-  oled.drawPixel([
-    [SIZE_X-0, 0, 0],
-    [SIZE_X-0, SIZE_Y-0, 0],
-    [0, SIZE_Y-0, 0],
-    [0, 0, 0]
-  ]);
 }
 catch(err) {
   // Print an error message and terminate the application
@@ -70,40 +63,46 @@ var lteBaudrate = '115200';
 var ae_name = {};
 ae_name = JSON.parse(fs.readFileSync('flight.json', 'utf8'));
 var cnt_name = '';
-displayMsg('Start thyme_tas_mav.js');
+oled.writeString(font, 1, 'Start thyme_tas_mav.js', 1, true);
+//displayMsg('Start thyme_tas_mav.js');
 
 exports.ready = function tas_ready() {
     cnt_name = my_cnt_name.split('/')[4]
-	displayMsg('Drone Type:' + my_drone_type);
+    oled.clearDisplay();
+    oled.setCursor(1,1);
+    oled.writeString(font, 1, my_drone_type, 1, true);
+    //displayMsg('Drone Type:' + my_drone_type);
     if(my_drone_type === 'dji') {
         if (_server == null) {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
-                displayMsg('DJI Port Open:' + mavPortNum + ', 115200');
+                oled.setCursor(64,1);
+                oled.writeString(font, 1, mavPortNum + '/115200', 1, true);
+                //displayMsg('DJI Port Open:' + mavPortNum + ', 115200');
                 socket.id = Math.random() * 1000;
 
                 socket.on('data', dji_handler);
 
                 socket.on('end', function () {
                     console.log('end');
-                    displayMsg('DJI Port End.');
+                    //displayMsg('DJI Port End.');
                 });
 
                 socket.on('close', function () {
                     console.log('close');
-                    displayMsg('DJI Port Closed.');
+                    //displayMsg('DJI Port Closed.');
                 });
 
                 socket.on('error', function (e) {
                     console.log('error ', e);
-                    displayMsg('DJI Port Error: ' + e);
+                    //displayMsg('DJI Port Error: ' + e);
                 });
             });
         }
 
         _server.listen(conf.ae.tas_mav_port, function () {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
-			displayMsg('TCP Server is listening...');
+			//displayMsg('TCP Server is listening...');
             setTimeout(dji_sdk_lunch, 1500);
         });
     }
@@ -162,7 +161,9 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
 
         setTimeout(function () {
             sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
-			displayMsg('Send Drone Data..');
+                oled.setCursor(1,10);
+                oled.writeString(font, 1, 'send to Mobius', 1, true);
+                //displayMsg('Send Drone Data..');
             });
 
             delete aggr_content[topic];
@@ -365,13 +366,17 @@ exports.noti = function (path_arr, cinObj, socket) {
 exports.gcs_noti_handler = function (message) {
     if(my_drone_type === 'dji') {
         socket_mav.write(message);
-        displayMsg('DJI Mission : ' + message);
+        oled.setCursor(1,20);
+        oled.writeString(font, 1, message, 1, true);
+        //displayMsg('DJI Mission : ' + message);
     }
     else if(my_drone_type === 'pixhawk') {
         if (mavPort != null) {
             if (mavPort.isOpen) {
                 mavPort.write(message);
-                displayMsg('pixhawk Mission : ' + message);
+                oled.setCursor(1,20);
+                oled.writeString(font, 1, message, 1, true);
+                //displayMsg('pixhawk Mission : ' + message);
             }
         }
     }
@@ -402,26 +407,28 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
-	displayMsg(mavPortNum + ', ' + mavBaudrate);
+    oled.setCursor(64,1);
+    oled.writeString(font, 1, mavPortNum + '/' + mavBaudrate, 1, true);
+    // displayMsg(mavPortNum + ', ' + mavBaudrate);
 
 }
 
 function mavPortClose() {
     console.log('mavPort closed.');
-	displayMsg('Pixhawk Port Closed.');
+	// displayMsg('Pixhawk Port Closed.');
     setTimeout(mavPortOpening, 2000);
 }
 
 function mavPortError(error) {
     var error_str = error.toString();
     console.log('[mavPort error]: ' + error.message);
-    displayMsg('[mavPort error]: ' + error.message);
+    // displayMsg('[mavPort error]: ' + error.message);
     if (error_str.substring(0, 14) == "Error: Opening") {
 
     }
     else {
         console.log('Pixhawk Port error : ' + error);
-        displayMsg('Pixhawk Port Error: ' + error);
+        // displayMsg('Pixhawk Port Error: ' + error);
     }
 
     setTimeout(mavPortOpening, 2000);
@@ -745,14 +752,14 @@ function ltePortOpen() {
 
 function ltePortClose() {
     console.log('ltePort closed.');
-	displayMsg('LTE Port Closed');
+	// displayMsg('LTE Port Closed');
     setTimeout(ltePortOpening, 2000);
 }
 
 function ltePortError(error) {
     var error_str = error.toString();
     console.log('[ltePort error]: ' + error.message);
-    displayMsg('[ltePort error]: ' + error.message);
+    // displayMsg('[ltePort error]: ' + error.message);
     if (error_str.substring(0, 14) == "Error: Opening") {
 
     }
@@ -847,11 +854,11 @@ function sendLteRssi(gpi) {
     });
 }
 
-function displayMsg(msg) {
-	// oled.clearDisplay();
-    oled.setCursor(1, 0);
-    var message = ('IP:' + ip.address() + '\n' + ae_name.flight + ',' + cnt_name + '\n' + msg);
-	oled.writeString(font, 1, message, 1, true);
-    sleep(1000);
-    oled.clearDisplay();
-}
+// function displayMsg(msg) {
+// 	// oled.clearDisplay();
+//     oled.setCursor(1, 0);
+//     var message = ('IP:' + ip.address() + '\n' + ae_name.flight + ',' + cnt_name + '\n' + msg);
+// 	oled.writeString(font, 1, message, 1, true);
+//     sleep(1000);
+//     oled.clearDisplay();
+// }
