@@ -365,8 +365,9 @@ exports.noti = function (path_arr, cinObj, socket) {
 };
 
 exports.gcs_noti_handler = function (message) {
-    console.log(message);
     if(my_drone_type === 'dji') {
+        var com_msg = message.toString();
+        console.log(com_msg);
         socket_mav.write(message);
         oled.setCursor(0,20);
         oled.writeString(font, 1, message, 1, true);
