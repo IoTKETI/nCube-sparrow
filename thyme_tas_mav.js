@@ -63,21 +63,22 @@ var lteBaudrate = '115200';
 var ae_name = {};
 ae_name = JSON.parse(fs.readFileSync('flight.json', 'utf8'));
 var cnt_name = '';
-oled.writeString(font, 1, 'Start thyme_tas_mav.js', 1, true);
+oled.setCursor(0,10);
+oled.writeString(font, 1, 'Start thyme_tas_mav', 1, true);
 //displayMsg('Start thyme_tas_mav.js');
 
 exports.ready = function tas_ready() {
     cnt_name = my_cnt_name.split('/')[4]
     oled.clearDisplay();
-    oled.setCursor(1,1);
+    oled.setCursor(0,0);
     oled.writeString(font, 1, my_drone_type, 1, true);
     //displayMsg('Drone Type:' + my_drone_type);
     if(my_drone_type === 'dji') {
         if (_server == null) {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
-                oled.setCursor(24,1);
-                oled.writeString(font, 1, mavPortNum.substring(4,11) + '/115200', 1, true);
+                oled.setCursor(36,0);
+                oled.writeString(font, 1, mavPortNum.substring(5,11) + '/115200', 1, true);
                 //displayMsg('DJI Port Open:' + mavPortNum + ', 115200');
                 socket.id = Math.random() * 1000;
 
@@ -161,8 +162,8 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
 
         setTimeout(function () {
             sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
-                oled.setCursor(1,10);
-                oled.writeString(font, 1, 'send to Mobius', 1, true);
+                oled.setCursor(0,10);
+                oled.writeString(font, 1, 'send to '+topic.split('/')[4], 1, true);
                 //displayMsg('Send Drone Data..');
             });
 
@@ -366,7 +367,7 @@ exports.noti = function (path_arr, cinObj, socket) {
 exports.gcs_noti_handler = function (message) {
     if(my_drone_type === 'dji') {
         socket_mav.write(message);
-        oled.setCursor(1,20);
+        oled.setCursor(0,20);
         oled.writeString(font, 1, message, 1, true);
         //displayMsg('DJI Mission : ' + message);
     }
@@ -374,7 +375,7 @@ exports.gcs_noti_handler = function (message) {
         if (mavPort != null) {
             if (mavPort.isOpen) {
                 mavPort.write(message);
-                oled.setCursor(1,20);
+                oled.setCursor(0,20);
                 oled.writeString(font, 1, message, 1, true);
                 //displayMsg('pixhawk Mission : ' + message);
             }
@@ -407,8 +408,8 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
-    oled.setCursor(64,1);
-    oled.writeString(font, 1, mavPortNum + '/' + mavBaudrate, 1, true);
+    oled.setCursor(40,0);
+    oled.writeString(font, 1, mavPortNum.substring(5,11) + '/' + mavBaudrate, 1, true);
     // displayMsg(mavPortNum + ', ' + mavBaudrate);
 
 }
