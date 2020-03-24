@@ -78,7 +78,7 @@ exports.ready = function tas_ready() {
             _server = net.createServer(function (socket) {
                 console.log('socket connected');
                 oled.setCursor(36,0);
-                oled.writeString(font, 1, mavPortNum.substring(5,11) + '/115200', 1, true);
+                oled.writeString(font, 1, mavPortNum.substring(4,11) + '/115200', 1, true);
                 //displayMsg('DJI Port Open:' + mavPortNum + ', 115200');
                 socket.id = Math.random() * 1000;
 
@@ -365,6 +365,7 @@ exports.noti = function (path_arr, cinObj, socket) {
 };
 
 exports.gcs_noti_handler = function (message) {
+    console.log(message);
     if(my_drone_type === 'dji') {
         socket_mav.write(message);
         oled.setCursor(0,20);
@@ -409,7 +410,7 @@ function mavPortOpening() {
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
     oled.setCursor(40,0);
-    oled.writeString(font, 1, mavPortNum.substring(5,11) + '/' + mavBaudrate, 1, true);
+    oled.writeString(font, 1, mavPortNum.substring(4,11) + '/' + mavBaudrate, 1, true);
     // displayMsg(mavPortNum + ', ' + mavBaudrate);
 
 }
