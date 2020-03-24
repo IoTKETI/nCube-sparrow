@@ -370,7 +370,7 @@ exports.gcs_noti_handler = function (message) {
         console.log(com_msg);
         socket_mav.write(message);
         oled.setCursor(0,20);
-        oled.writeString(font, 1, message, 1, true);
+        oled.writeString(font, 1, com_msg, 1, true);
         //displayMsg('DJI Mission : ' + message);
     }
     else if(my_drone_type === 'pixhawk') {
