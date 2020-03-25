@@ -368,23 +368,23 @@ exports.noti = function (path_arr, cinObj, socket) {
 
 
 exports.gcs_noti_handler = function (message) {
-    console.log('gcs_noti - message: '+message);
     if(my_drone_type === 'dji') {
-        var com_msg = message.toString();
-        console.log('command_msg: '+com_msg.substr(0,1));
         socket_mav.write(message);
-        // com_message = com_msg.split(":");
-        // var msg_command = com_message[0];
-        // if (msg_command == 'g') {
-        //     var msg_lat = com_message[1].substring(0,7);
-        //     var msg_lon = com_message[2].substring(0,7);
-        //     var msg_alt = com_message[3].substring(0,3);
-        //     oled.setCursor(0,20);
-        //     oled.writeString(font, 1, msg_command+':'+msg_lat+':'+msg_lon+':'+msg_alt, 1, true);
-        // }
-        oled.setCursor(0,20);
-        oled.writeString(font, 1, com_msg, 1, true);
-}
+        var com_msg = message.toString();
+        com_message = com_msg.split(":");
+        var msg_command = com_message[0];
+        if (msg_command == 't' || msg_command == 'h' || msg_command == 'l'|| msg_command == 'm'|| msg_command == 'a') {
+            oled.setCursor(0,20);
+            oled.writeString(font, 1, com_msg, 1, true);
+        }
+        else if (msg_command == 'g') {
+            var msg_lat = com_message[1].substring(0,7);
+            var msg_lon = com_message[2].substring(0,7);
+            var msg_alt = com_message[3].substring(0,3);
+            oled.setCursor(0,20);
+            oled.writeString(font, 1, msg_command+':'+msg_lat+':'+msg_lon+':'+msg_alt, 1, true);
+        }
+    }
     else if(my_drone_type === 'pixhawk') {
         if (mavPort != null) {
             if (mavPort.isOpen) {
