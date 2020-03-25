@@ -380,7 +380,7 @@ exports.gcs_noti_handler = function (message) {
         var msg_lon = com_message[2].substring(0,6);
         var msg_alt = com_message[3].substring(0,3);
         oled.setCursor(0,20);
-        oled.writeString(font, 1, com_msg.substring(), 1, true);
+        oled.writeString(font, 1, msg_command+':'+msg_lat+':'+msg_lon+':'+msg_alt, 1, true);
             // pre_com_msg = com_msg;
         // }
         // else {
