@@ -256,7 +256,7 @@ function sendDroneMessage(type, params) {
             console.log("mavlink message is null");
         }
         else {
-            console.log('msg: ', msg);
+            // console.log('msg: ', msg);
             // console.log('msg_seq : ', msg.slice(2,3));
             //mqtt_client.publish(my_cnt_name, msg.toString('hex'));
             //_this.send_aggr_to_Mobius(my_cnt_name, msg.toString('hex'), 1500);
