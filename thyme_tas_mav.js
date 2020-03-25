@@ -367,16 +367,24 @@ exports.noti = function (path_arr, cinObj, socket) {
 };
 
 var com_msg ='';
+var pre_com_msg ='';
 exports.gcs_noti_handler = function (message) {
     if(my_drone_type === 'dji') {
         com_msg = message.toString();
         console.log(com_msg);
         socket_mav.write(message);
-        // oled.setCursor(0,20);
-        // oled.writeString(font, 1, '                     ', 1, true);
-        oled.setCursor(0,20);
-        oled.writeString(font, 1, com_msg, 1, true);
-        com_msg='';
+        if (pre_com_msg == com_msg) {
+            oled.setCursor(0,20);
+            oled.writeString(font, 1, com_msg, 1, true);
+            pre_com_msg = com_msg;
+        }
+        else {
+            oled.setCursor(0,20);
+            oled.writeString(font, 1, '                      ', 1, true);
+            oled.setCursor(0,20);
+            oled.writeString(font, 1, com_msg, 1, true);
+            pre_com_msg = com_msg;
+        }
         //displayMsg('DJI Mission : ' + message);
     }
     else if(my_drone_type === 'pixhawk') {
@@ -419,7 +427,7 @@ function mavPortOpening() {
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
     oled.setCursor(42,0);
-    oled.writeString(font, 1, mavPortNum.substring(4,11) + '/' + mavBaudrate, 1, true);
+    oled.writeString(font, 1, mavPortNum.substring(4,12) + '/' + mavBaudrate, 1, true);
     // displayMsg(mavPortNum + ', ' + mavBaudrate);
 
 }
