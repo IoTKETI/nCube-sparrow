@@ -413,7 +413,7 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
-    oled.setCursor(40,0);
+    oled.setCursor(44,0);
     oled.writeString(font, 1, mavPortNum.substring(4,11) + '/' + mavBaudrate, 1, true);
     // displayMsg(mavPortNum + ', ' + mavBaudrate);
 
