@@ -163,7 +163,8 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
         setTimeout(function () {
             sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
                 oled.setCursor(0,10);
-                oled.writeString(font, 1, 'send to '+topic.split('/')[4], 1, true);
+                oled.writeString(font, 1, '                     ', 1, true);
+                oled.writeString(font, 1, 'Send to /'+topic.split('/')[4]+'/', 1, true);
                 //displayMsg('Send Drone Data..');
             });
 
@@ -370,6 +371,7 @@ exports.gcs_noti_handler = function (message) {
         console.log(com_msg);
         socket_mav.write(message);
         oled.setCursor(0,20);
+        oled.writeString(font, 1, '                     ', 1, true);
         oled.writeString(font, 1, com_msg, 1, true);
         //displayMsg('DJI Mission : ' + message);
     }
@@ -378,6 +380,7 @@ exports.gcs_noti_handler = function (message) {
             if (mavPort.isOpen) {
                 mavPort.write(message);
                 oled.setCursor(0,20);
+                oled.writeString(font, 1, '                     ', 1, true);
                 oled.writeString(font, 1, message, 1, true);
                 //displayMsg('pixhawk Mission : ' + message);
             }
