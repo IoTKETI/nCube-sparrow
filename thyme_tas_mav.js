@@ -373,23 +373,23 @@ exports.gcs_noti_handler = function (message) {
         com_msg = message.toString();
         console.log(com_msg);
         socket_mav.write(message);
-        if (pre_com_msg == com_msg) {
-            com_message = com_msg.split(":");
-            var msg_command = com_message[0];
-            var msg_lat = com_message[1].substring(0,6);
-            var msg_lon = com_message[2].substring(0,6);
-            var msg_alt = com_message[3].substring(0,3);
-            oled.setCursor(0,20);
-            oled.writeString(font, 1, com_msg.substring(), 1, true);
-            pre_com_msg = com_msg;
-        }
-        else {
-            oled.setCursor(0,20);
-            oled.writeString(font, 1, '                 ', 1, true);
-            oled.setCursor(0,20);
-            oled.writeString(font, 1, com_msg, 1, true);
-            pre_com_msg = com_msg;
-        }
+        // if (pre_com_msg == com_msg) {
+        com_message = com_msg.split(":");
+        var msg_command = com_message[0];
+        var msg_lat = com_message[1].substring(0,6);
+        var msg_lon = com_message[2].substring(0,6);
+        var msg_alt = com_message[3].substring(0,3);
+        oled.setCursor(0,20);
+        oled.writeString(font, 1, com_msg.substring(), 1, true);
+            // pre_com_msg = com_msg;
+        // }
+        // else {
+        //     oled.setCursor(0,20);
+        //     oled.writeString(font, 1, '                 ', 1, true);
+        //     oled.setCursor(0,20);
+        //     oled.writeString(font, 1, com_msg, 1, true);
+        //     pre_com_msg = com_msg;
+        // }
         //displayMsg('DJI Mission : ' + message);
     }
     else if(my_drone_type === 'pixhawk') {
