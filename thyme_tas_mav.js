@@ -387,8 +387,8 @@ exports.gcs_noti_handler = function (message) {
                 mavPort.write(message);
                 // oled.setCursor(0,20);
                 // oled.writeString(font, 1, '                     ', 1, true);
-                oled.setCursor(0,20);
-                oled.writeString(font, 1, message, 1, true);
+                // oled.setCursor(0,20);
+                // oled.writeString(font, 1, message, 1, true);
                 //displayMsg('pixhawk Mission : ' + message);
             }
         }
