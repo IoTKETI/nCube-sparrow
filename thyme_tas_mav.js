@@ -370,7 +370,7 @@ exports.noti = function (path_arr, cinObj, socket) {
 exports.gcs_noti_handler = function (message) {
     if(my_drone_type === 'dji') {
         var com_msg = message.toString();
-        console.log(com_msg);
+        console.log(com_msg.substr(0,1));
         socket_mav.write(message);
         // if (pre_com_msg == com_msg) {
         com_message = com_msg.split(":");
