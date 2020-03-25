@@ -380,7 +380,7 @@ exports.gcs_noti_handler = function (message) {
         }
         else {
             oled.setCursor(0,20);
-            oled.writeString(font, 1, '                      ', 1, true);
+            oled.writeString(font, 1, '                 ', 1, true);
             oled.setCursor(0,20);
             oled.writeString(font, 1, com_msg, 1, true);
             pre_com_msg = com_msg;

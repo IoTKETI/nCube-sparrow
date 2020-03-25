@@ -25,9 +25,9 @@ try {
   oled.clearDisplay();
   oled.turnOnDisplay();
   
-  oled.setCursor(1,10)
+  oled.setCursor(1,10);
   oled.writeString(font, 1, 'Start Sparrow Board', 1, true);
-  oled.setCursor(1,20)
+  oled.setCursor(1,20);
   oled.writeString(font, 1, 'IP: ' + ip.address(), 1, true);
 }
 catch(err) {
