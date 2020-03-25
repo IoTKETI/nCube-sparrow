@@ -163,7 +163,6 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
         setTimeout(function () {
             sh_adn.crtci(topic+'?rcn=0', 0, aggr_content[topic], null, function () {
                 oled.setCursor(0,10);
-                oled.writeString(font, 1, '                     ', 1, true);
                 oled.writeString(font, 1, 'Send to /'+topic.split('/')[4]+'/', 1, true);
                 //displayMsg('Send Drone Data..');
             });
