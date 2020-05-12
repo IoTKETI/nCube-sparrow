@@ -879,6 +879,7 @@ function sendLteRssi(gpi) {
 
     });
 }
+var gitpull = null;
 
 function git_pull_lunch() {
     gitpull = spawn('sh', ['gitpull.sh']);
