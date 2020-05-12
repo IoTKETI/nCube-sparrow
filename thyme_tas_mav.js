@@ -886,7 +886,7 @@ buttons.watch(function (err, value) {
         return;
     }
     gitpull = spawn('sh', ['gitpull.sh']);
-    djiosdk.stdout.on('data', function(data) {
+    gitpull.stdout.on('data', function(data) {
         console.log('stdout: ' + data);
     });
 
