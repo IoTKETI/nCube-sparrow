@@ -885,7 +885,7 @@ buttons.watch(function (err, value) {
         console.error('There was an error', err);
         return;
     }
-    exec('sh gitpull.sh', (error, stdout, stderr) => {
+    exec('sh /home/pi/nCube-sparrow/gitpull.sh', (error, stdout, stderr) => {
         if (error) {
             console.log(`error: ${error.message}`);
             return;
