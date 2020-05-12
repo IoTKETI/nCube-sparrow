@@ -888,17 +888,17 @@ function git_pull_lunch() {
 
     gitpull.stderr.on('data', function(data) {
         console.log('stderr: ' + data);
-        setTimeout(git_pull_lunch, 1500);
+//        setTimeout(git_pull_lunch, 1500);
     });
 
     gitpull.on('exit', function(code) {
         console.log('exit: ' + code);
-        setTimeout(git_pull_lunch, 1500);
+//        setTimeout(git_pull_lunch, 1500);
     });
 
     gitpull.on('error', function(code) {
         console.log('error: ' + code);
-        setTimeout(git_pull_lunch, 1500);
+//        setTimeout(git_pull_lunch, 1500);
     });
 }
 
