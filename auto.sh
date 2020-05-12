@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 sudo chmod 777 /home/pi/nCube-sparrow/
 cd /home/pi/nCube-sparrow

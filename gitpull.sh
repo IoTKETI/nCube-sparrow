@@ -1,4 +1,4 @@
-#!/usr/bin/sh
+#!/bin/sh
 
 echo "Stop nCube-sparrow"
 pm2 stop 0
