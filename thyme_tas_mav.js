@@ -23,7 +23,26 @@ var fs = require('fs');
 // Button
 var Gpio = require('onoff').Gpio;
 var buttons = new Gpio(6, 'in', 'both');
-const exec = require('child_process').exec;
+var exec = require('child_process').exec;
+
+buttons.watch(function (err, value) {
+    if (err){
+        console.error('There was an error', err);
+        return;
+    }
+    exec("sh gitpull.sh", function (error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+	console.log('stderr: ' + stderr);
+	if (error !== null) {
+            console.log('exec error: '+ error);
+        }
+    });
+});
+
+function unexportOnClose() {
+    buttons.unexport();
+};
+
 /*
 // I2C
 var bus = 3;
@@ -879,28 +898,6 @@ function sendLteRssi(gpi) {
 
     });
 }
-
-buttons.watch(function (err, value) {
-    if (err){
-        console.error('There was an error', err);
-        return;
-    }
-    exec('sh /home/pi/nCube-sparrow/gitpull.sh', (error, stdout, stderr) => {
-        if (error) {
-            console.log(`error: ${error.message}`);
-            return;
-        }
-        if (stderr) {
-            console.log(`stderr: ${stderr}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-    });
-});
-
-function unexportOnClose() {
-    buttons.unexport();
-};
 
 // function displayMsg(msg) {
 // 	// oled.clearDisplay();
