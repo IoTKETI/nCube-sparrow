@@ -23,7 +23,6 @@ var fs = require('fs');
 // Button
 var Gpio = require('onoff').Gpio;
 var buttons = new Gpio(6, 'in', 'both');
-var exec = require('child_process').exec;
 /*
 // I2C
 var bus = 3;
