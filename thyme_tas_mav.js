@@ -896,9 +896,7 @@ buttons.watch(function (err, value) {
 });
 
 function unexportOnClose() {
-  button.unexport();
-  LED.writeSync(0);
-  LED.unexport();
+  buttons.unexport();
 };
 
 // function displayMsg(msg) {
