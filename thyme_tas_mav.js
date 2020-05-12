@@ -885,30 +885,17 @@ buttons.watch(function (err, value) {
         console.error('There was an error', err);
         return;
     }
-    gitpull = spawn('sh gitpull.sh');
-    gitpull.stdout.on('data', function(data) {
-        console.log('stdout: ' + data);
+    gitpull = exec('sh gitpull.sh', (error, stdout, stderr) => {
+        if (error) {
+            console.log(`error: ${error.message}`);
+            return;
+        }
+        if (stderr) {
+            console.log(`stderr: ${stderr}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
     });
-
-    gitpull.stderr.on('data', function(data) {
-        console.log('stderr: ' + data);
-    });
-
-    gitpull.on('exit', function(code) {
-        console.log('exit: ' + code);
-    });
-
-    gitpull.on('error', function(code) {
-        console.log('error: ' + code);
-    });
-//    exec('sh gitpull.sh', function (error, stdout, stderr) {
-//        console.log('stdout: ' + stdout);
-//        console.log('stderr: ' + stderr);
-//        if (error !== null) {
-//            console.log('exec error: ' + error);
-//        }
-//      });
-  //console.log(value);
 });
 
 function unexportOnClose() {
