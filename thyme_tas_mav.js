@@ -880,11 +880,7 @@ function sendLteRssi(gpi) {
     });
 }
 
-buttons.watch(function (err, value) {
-    if (err){
-        console.error('There was an error', err);
-        return;
-    }
+function git_pull_lunch() {
     gitpull = spawn('sh', ['gitpull.sh']);
     gitpull.stdout.on('data', function(data) {
         console.log('stdout: ' + data);
@@ -892,25 +888,26 @@ buttons.watch(function (err, value) {
 
     gitpull.stderr.on('data', function(data) {
         console.log('stderr: ' + data);
+        setTimeout(git_pull_lunch, 1500);
     });
 
     gitpull.on('exit', function(code) {
         console.log('exit: ' + code);
+        setTimeout(git_pull_lunch, 1500);
     });
 
     gitpull.on('error', function(code) {
         console.log('error: ' + code);
+        setTimeout(git_pull_lunch, 1500);
     });
-/*
-    exec('./gitpull.sh', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
-    });
-*/
+}
+
+buttons.watch(function (err, value) {
+    if (err){
+        console.error('There was an error', err);
+        return;
+    }
+    setTimeout(git_pull_lunch, 1500);
 });
 
 function unexportOnClose() {
