@@ -881,17 +881,17 @@ function sendLteRssi(gpi) {
 }
 
 buttons.watch(function (err, value) {
-  if (err){
-    console.error('There was an error', err);
-  return;
-  }
-  exec("sh gitpull.sh", function (error, stdout, stderr) {
-    console.log('stdout: ' + stdout);
-    console.log('stderr: ' + stderr);
-    if (error !== null) {
-      console.log('exec error: ' + error);
+    if (err){
+        console.error('There was an error', err);
+        return;
     }
-  });
+    exec('sh gitpull.sh', function (error, stdout, stderr) {
+        console.log('stdout: ' + stdout);
+        console.log('stderr: ' + stderr);
+        if (error !== null) {
+            console.log('exec error: ' + error);
+        }
+      });
   //console.log(value);
 });
 
