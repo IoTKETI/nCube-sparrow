@@ -30,7 +30,7 @@ buttons.watch(function (err, value) {
         console.error('There was an error', err);
         return;
     }
-    exec("sh gitpull.sh", function (error, stdout, stderr) {
+    exec("./gitpull.sh", function (error, stdout, stderr) {
         console.log('stdout: ' + stdout);
 	console.log('stderr: ' + stderr);
 	if (error !== null) {
