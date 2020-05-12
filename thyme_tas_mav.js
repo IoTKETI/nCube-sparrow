@@ -908,7 +908,7 @@ buttons.watch(function (err, value) {
         console.error('There was an error', err);
         return;
     }
-    setTimeout(git_pull_lunch, 1500);
+    git_pull_lunch();
 });
 
 function unexportOnClose() {
