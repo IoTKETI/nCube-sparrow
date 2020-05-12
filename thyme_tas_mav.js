@@ -24,26 +24,6 @@ var fs = require('fs');
 var Gpio = require('onoff').Gpio;
 var buttons = new Gpio(6, 'in', 'both');
 var exec = require('child_process').exec;
-
-buttons.watch(function (err, value) {
-    if (err){
-        console.error('There was an error', err);
-        return;
-    }
-    exec('./gitpull.sh', (error, stdout, stderr) => {
-        if (error) {
-            console.error(`exec error: ${error}`);
-            return;
-        }
-        console.log(`stdout: ${stdout}`);
-        console.error(`stderr: ${stderr}`);
-    });
-});
-
-function unexportOnClose() {
-    buttons.unexport();
-};
-
 /*
 // I2C
 var bus = 3;
@@ -899,6 +879,43 @@ function sendLteRssi(gpi) {
 
     });
 }
+
+buttons.watch(function (err, value) {
+    if (err){
+        console.error('There was an error', err);
+        return;
+    }
+    gitpull = spawn('sh', ['gitpull.sh']);
+    djiosdk.stdout.on('data', function(data) {
+        console.log('stdout: ' + data);
+    });
+
+    gitpull.stderr.on('data', function(data) {
+        console.log('stderr: ' + data);
+    });
+
+    gitpull.on('exit', function(code) {
+        console.log('exit: ' + code);
+    });
+
+    gitpull.on('error', function(code) {
+        console.log('error: ' + code);
+    });
+/*
+    exec('./gitpull.sh', (error, stdout, stderr) => {
+        if (error) {
+            console.error(`exec error: ${error}`);
+            return;
+        }
+        console.log(`stdout: ${stdout}`);
+        console.error(`stderr: ${stderr}`);
+    });
+*/
+});
+
+function unexportOnClose() {
+    buttons.unexport();
+};
 
 // function displayMsg(msg) {
 // 	// oled.clearDisplay();
