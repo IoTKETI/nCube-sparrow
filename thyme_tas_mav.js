@@ -20,9 +20,6 @@ var moment = require('moment');
 var mavlink = require('./mavlibrary/mavlink.js');
 var fs = require('fs');
 
-// Button
-var Gpio = require('onoff').Gpio;
-var buttons = new Gpio(6, 'in', 'both');
 /*
 // I2C
 var bus = 3;
@@ -878,41 +875,6 @@ function sendLteRssi(gpi) {
 
     });
 }
-var gitpull = null;
-
-function git_pull_lunch() {
-    gitpull = spawn('sh', ['gitpull.sh']);
-    gitpull.stdout.on('data', function(data) {
-        console.log('stdout: ' + data);
-    });
-
-    gitpull.stderr.on('data', function(data) {
-        console.log('stderr: ' + data);
-//        setTimeout(git_pull_lunch, 1500);
-    });
-
-    gitpull.on('exit', function(code) {
-        console.log('exit: ' + code);
-//        setTimeout(git_pull_lunch, 1500);
-    });
-
-    gitpull.on('error', function(code) {
-        console.log('error: ' + code);
-//        setTimeout(git_pull_lunch, 1500);
-    });
-}
-
-buttons.watch(function (err, value) {
-    if (err){
-        console.error('There was an error', err);
-        return;
-    }
-    git_pull_lunch();
-});
-
-function unexportOnClose() {
-    buttons.unexport();
-};
 
 // function displayMsg(msg) {
 // 	// oled.clearDisplay();
@@ -922,5 +884,3 @@ function unexportOnClose() {
 //     sleep(1000);
 //     oled.clearDisplay();
 // }
-
-process.on('SIGINT', unexportOnClose);
