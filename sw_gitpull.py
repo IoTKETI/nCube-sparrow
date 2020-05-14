@@ -17,7 +17,7 @@ try:
     flag = 0
     while True:
         # check if button pressed
-        if(GPIO.input(button_pin) == 0 and flag == 0):
+        if(GPIO.input(button_pin) == 1 and flag == 0):
             # start git pull
             flag = 1
             os.system("./gitpull.sh")
