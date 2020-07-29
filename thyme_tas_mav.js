@@ -176,7 +176,7 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
 }
 
 function mavlinkGenerateMessage(type, params) { 
-    var TEST_GEN_MAVLINK_SYSTEM_ID = 8;
+    var TEST_GEN_MAVLINK_SYSTEM_ID = target_system_id;
     const mavlinkParser = new MAVLink(null/*logger*/, TEST_GEN_MAVLINK_SYSTEM_ID, 0);
     try {
         var mavMsg = null;

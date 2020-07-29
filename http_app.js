@@ -199,6 +199,8 @@ function create_sub_all(count, callback) {
     }
 }
 
+global.target_system_id = 0;
+
 function retrieve_my_cnt_name(callback) {
     sh_adn.rtvct('/Mobius/UTM/approval/'+conf.ae.name+'/la', 0, function (rsc, res_body, count) {
         if(rsc == 2000) {
@@ -324,6 +326,10 @@ function retrieve_my_cnt_name(callback) {
             else {
                 my_secure = 'off';
             }
+            if(drone_info.hasOwnProperty('system_id')) {
+                target_system_id = drone_info.system_id;
+            }
+            console.log("System ID" + target_system_id);
 
             gcs_noti_topic = '/Mobius/' + my_gcs_name + '/GCS_Data/' + drone_info.drone;
             MQTT_SUBSCRIPTION_ENABLE = 1;
