@@ -44,7 +44,7 @@ global.my_sortie_name = 'disarm';
 
 global.my_drone_type = 'pixhawk';
 global.my_secure = 'off';
-global.target_system_id = 8;
+global.my_system_id = 8;
 
 global.Req_auth = '';
 global.Res_auth = '';
@@ -326,10 +326,10 @@ function retrieve_my_cnt_name(callback) {
                 my_secure = 'off';
             }
             if(drone_info.hasOwnProperty('system_id')) {
-                target_system_id = drone_info.system_id;
+                my_system_id = drone_info.system_id;
             }
             else{
-                target_system_id = 8;
+                my_system_id = 8;
             }
 
             gcs_noti_topic = '/Mobius/' + my_gcs_name + '/GCS_Data/' + drone_info.drone;

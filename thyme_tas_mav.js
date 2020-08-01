@@ -93,6 +93,8 @@ exports.ready = function tas_ready() {
                 socket.on('close', function () {
                     console.log('close');
                     //displayMsg('DJI Port Closed.');
+
+                    setTimeout(dji_sdk_lunch, 10);
                 });
 
                 socket.on('error', function (e) {
@@ -175,9 +177,8 @@ function send_aggr_to_Mobius(topic, content_each, gap) {
     }
 }
 
-function mavlinkGenerateMessage(type, params) { 
-    var TEST_GEN_MAVLINK_SYSTEM_ID = target_system_id;
-    const mavlinkParser = new MAVLink(null/*logger*/, TEST_GEN_MAVLINK_SYSTEM_ID, 0);
+function mavlinkGenerateMessage(sysId, type, params) {
+    const mavlinkParser = new MAVLink(null/*logger*/, sysId, 0);
     try {
         var mavMsg = null;
         var genMsg = null;
@@ -252,7 +253,7 @@ function mavlinkGenerateMessage(type, params) {
 
 function sendDroneMessage(type, params) {
     try {
-        var msg = mavlinkGenerateMessage(type, params);
+        var msg = mavlinkGenerateMessage(my_system_id, type, params);
         if (msg == null) {
             console.log("mavlink message is null");
         }
