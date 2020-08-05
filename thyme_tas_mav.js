@@ -412,9 +412,6 @@ exports.gcs_noti_handler = function (message) {
 //            oled.setCursor(0,20);
 //            oled.writeString(font, 1, com_msg, 1, true);
         }
-        else if (msg_command == 'v') {
-            socket_mav.write(message);
-        }
     }
     else if(my_drone_type === 'pixhawk') {
         if (mavPort != null) {
