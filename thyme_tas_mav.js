@@ -390,6 +390,12 @@ exports.gcs_noti_handler = function (message) {
 //            oled.writeString(font, 1, msg_command + ':', 1, true);
         }
         else if (msg_command == 'g') {
+            if(com_message.length < 5) {
+                for(var i = 0; i < (5-com_message.length); i++) {
+                    com_msg += ':0';
+                }
+                message = Buffer.from(com_msg);
+            }
             socket_mav.write(message);
             //setTimeout(dji_command_one_more, 1000, message);
 
