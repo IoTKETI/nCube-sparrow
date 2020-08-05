@@ -94,7 +94,7 @@ exports.ready = function tas_ready() {
                     console.log('close');
                     //displayMsg('DJI Port Closed.');
 
-                    setTimeout(dji_sdk_lunch, 10);
+                    setTimeout(dji_sdk_launch, 1000);
                 });
 
                 socket.on('error', function (e) {
@@ -107,7 +107,7 @@ exports.ready = function tas_ready() {
         _server.listen(conf.ae.tas_mav_port, function () {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
 			//displayMsg('TCP Server is listening...');
-            setTimeout(dji_sdk_lunch, 1500);
+            setTimeout(dji_sdk_launch, 1000);
         });
     }
     else if(my_drone_type === 'pixhawk') {
@@ -124,7 +124,7 @@ exports.ready = function tas_ready() {
 var spawn = require('child_process').spawn;
 var djiosdk = null;
 
-function dji_sdk_lunch() {
+function dji_sdk_launch() {
     djiosdk = spawn('./djiosdk-Mobius', ['UserConfig.txt']);
 
     djiosdk.stdout.on('data', function(data) {
@@ -134,19 +134,19 @@ function dji_sdk_lunch() {
     djiosdk.stderr.on('data', function(data) {
         console.log('stderr: ' + data);
 
-        setTimeout(dji_sdk_lunch, 1500);
+        //setTimeout(dji_sdk_launch, 1500);
     });
 
     djiosdk.on('exit', function(code) {
         console.log('exit: ' + code);
 
-        setTimeout(dji_sdk_lunch, 1500);
+        //setTimeout(dji_sdk_launch, 1000);
     });
 
     djiosdk.on('error', function(code) {
         console.log('error: ' + code);
 
-        setTimeout(dji_sdk_lunch, 1500);
+        //setTimeout(dji_sdk_launch, 1000);
     });
 }
 
@@ -292,6 +292,10 @@ function dji_handler(data) {
     dji.vz = data_arr[11];
     dji.battery = data_arr[12].replace(']', '');
 
+    // Debug
+    var debug_string = dji.lat + ', ' + dji.lon + ', ' + dji.alt + ', ' + dji.relative_alt;
+    mqtt_client.publish('my_cnt_name' + '/Debug', debug_string);
+
     // #0 PING
     params.time_usec = dji.timestamp;
     params.seq = 0;
@@ -380,14 +384,14 @@ exports.gcs_noti_handler = function (message) {
 
         if (msg_command == 't' || msg_command == 'h' || msg_command == 'l') {
             socket_mav.write(message);
-            setTimeout(dji_command_one_more, 1000, message);
+            //setTimeout(dji_command_one_more, 1000, message);
 
 //            oled.setCursor(0,20);
 //            oled.writeString(font, 1, msg_command + ':', 1, true);
         }
         else if (msg_command == 'g') {
             socket_mav.write(message);
-            setTimeout(dji_command_one_more, 1000, message);
+            //setTimeout(dji_command_one_more, 1000, message);
 
             var msg_lat = com_message[1].substring(0,7);
             var msg_lon = com_message[2].substring(0,7);
@@ -397,10 +401,13 @@ exports.gcs_noti_handler = function (message) {
         }
         else if (msg_command == 'm'|| msg_command == 'a') {
             socket_mav.write(message);
-            setTimeout(dji_command_one_more, 1000, message);
+            //setTimeout(dji_command_one_more, 1000, message);
 
 //            oled.setCursor(0,20);
 //            oled.writeString(font, 1, com_msg, 1, true);
+        }
+        else if (msg_command == 'v') {
+            socket_mav.write(message);
         }
     }
     else if(my_drone_type === 'pixhawk') {
@@ -515,7 +522,7 @@ function mavPortData(data) {
                 }
 
                 if(refLen == mavPacket.length) {
-                    mqtt_client.publish(my_cnt_name, new Buffer.from(mavPacket, 'hex'));
+                    mqtt_client.publish(my_cnt_name, Buffer.from(mavPacket, 'hex'));
                     send_aggr_to_Mobius(my_cnt_name, mavPacket, 1500);
                     mavStrPacket = '';
 
