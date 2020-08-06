@@ -294,7 +294,7 @@ function dji_handler(data) {
 
     // Debug
     var debug_string = dji.lat + ', ' + dji.lon + ', ' + dji.alt + ', ' + dji.relative_alt;
-    mqtt_client.publish('my_cnt_name' + '/Debug', debug_string);
+    mqtt_client.publish(my_parent_cnt_name + '/Debug', debug_string);
 
     // #0 PING
     params.time_usec = dji.timestamp;
