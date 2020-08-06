@@ -244,7 +244,7 @@ function mavlinkGenerateMessage(sysId, type, params) {
     }
 
     if (mavMsg) {
-        genMsg = new Buffer(mavMsg.pack(mavlinkParser));
+        genMsg = Buffer.from(mavMsg.pack(mavlinkParser));
         //console.log('>>>>> MAVLINK OUTGOING MSG: ' + genMsg.toString('hex'));
     }
 
@@ -609,7 +609,7 @@ function parseMav(mavPacket) {
                     tr_ch[5 + idx] = parseInt(mavPacket.substr(idx*2, 2), 16);
                 }
 
-                const message = new Buffer.from(tr_ch.buffer);
+                const message = Buffer.from(tr_ch.buffer);
                 secPort.write(message);
             }
         }
@@ -663,7 +663,7 @@ function parseMav(mavPacket) {
         //             tr_ch[5 + idx] = parseInt(mavPacket.substr((10 + idx) * 2, 2), 16);
         //         }
         //
-        //         const message = new Buffer.from(tr_ch.buffer);
+        //         const message = Buffer.from(tr_ch.buffer);
         //         secPort.write(message);
         //     }
         // }
@@ -684,7 +684,7 @@ function parseMav(mavPacket) {
                     tr_ch[5 + idx] = parseInt(mavPacket.substr(idx*2, 2), 16);
                 }
 
-                const message = new Buffer.from(tr_ch.buffer);
+                const message = Buffer.from(tr_ch.buffer);
                 secPort.write(message);
             }
         }
@@ -818,8 +818,8 @@ function ltePortError(error) {
 function lteReqGetRssi() {
     if(ltePort != null) {
         if (ltePort.isOpen) {
-            //var message = new Buffer.from('AT+CSQ\r');
-            var message = new Buffer.from('AT@DBG\r');
+            //var message = Buffer.from('AT+CSQ\r');
+            var message = Buffer.from('AT@DBG\r');
             ltePort.write(message);
         }
     }
