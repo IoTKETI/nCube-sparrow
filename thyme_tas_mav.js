@@ -226,16 +226,20 @@ function mavlinkGenerateMessage(sysId, type, params) {
                     params.pitchspeed,
                     params.yawspeed);
                 break;
-            case mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
-                mavMsg = new mavlink.messages.global_position_int(params.time_boot_ms,
-                    params.lat,
-                    params.lon,
-                    params.alt,
-                    params.relative_alt,
-                    params.vx,
-                    params.vy,
-                    params.vz,
-                    params.hdg);
+            case mavlink.MAVLINK_MSG_ID_SYS_STATUS:
+                mavMsg = new mavlink.messages.sys_status(params.onboard_control_sensors_present,
+                    params.onboard_control_sensors_enabled,
+                    params.onboard_control_sensors_health,
+                    params.load,
+                    params.voltage_battery,
+                    params.current_battery,
+                    params.battery_remaining,
+                    params.drop_rate_comm,
+                    params.errors_comm,
+                    params.errors_count1,
+                    params.errors_count2,
+                    params.errors_count3,
+                    params.errors_count4);
                 break;
         }
     }
@@ -290,7 +294,10 @@ function dji_handler(data) {
     dji.vx = data_arr[9];
     dji.vy = data_arr[10];
     dji.vz = data_arr[11];
-    dji.battery = data_arr[12].replace(']', '');
+    dji.bat_percentage = data_arr[12];
+    dji.bat_voltage = data_arr[13];
+    dji.bat_current = data_arr[14];
+    dji.bat_capacity = data_arr[15].replace(']', '');
 
     // Debug
     var debug_string = dji.lat + ', ' + dji.lon + ', ' + dji.alt + ', ' + dji.relative_alt;
@@ -357,6 +364,22 @@ function dji_handler(data) {
     params.vz = dji.vz;
     params.hdg = 0;
     setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params);
+
+    // #5 MAVLINK_SYS_STATUS(#1)
+    params.onboard_control_sensors_present = mavlink.MAV_SYS_STATUS_SENSOR_3D_GYRO & mavlink.MAV_SYS_STATUS_SENSOR_GPS;
+    params.onboard_control_sensors_enabled = mavlink.MAV_SYS_STATUS_SENSOR_3D_GYRO & mavlink.MAV_SYS_STATUS_SENSOR_GPS;
+    params.onboard_control_sensors_health = mavlink.MAV_SYS_STATUS_SENSOR_3D_GYRO & mavlink.MAV_SYS_STATUS_SENSOR_GPS;
+    params.load = 500;
+    params.voltage_battery = dji.bat_voltage;
+    params.current_battery = dji.bat_current;
+    params.battery_remaining = dji.bat_percentagea;
+    params.drop_rate_comm = 8;
+    params.errors_comm = 0;
+    params.errors_count1 = 0;
+    params.errors_count2 = 0;
+    params.errors_count3 = 0;
+    params.errors_count4 = 0;
+    setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_SYS_STATUS, params);
 }
 
 exports.noti = function (path_arr, cinObj, socket) {
