@@ -226,6 +226,17 @@ function mavlinkGenerateMessage(sysId, type, params) {
                     params.pitchspeed,
                     params.yawspeed);
                 break;
+            case mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT:
+                mavMsg = new mavlink.messages.global_position_int(params.time_boot_ms,
+                    params.lat,
+                    params.lon,
+                    params.alt,
+                    params.relative_alt,
+                    params.vx,
+                    params.vy,
+                    params.vz,
+                    params.hdg);
+                break;
             case mavlink.MAVLINK_MSG_ID_SYS_STATUS:
                 mavMsg = new mavlink.messages.sys_status(params.onboard_control_sensors_present,
                     params.onboard_control_sensors_enabled,
