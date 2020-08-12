@@ -140,7 +140,7 @@ function dji_sdk_launch() {
     djiosdk.on('exit', function(code) {
         console.log('exit: ' + code);
 
-        //setTimeout(dji_sdk_launch, 1000);
+        setTimeout(dji_sdk_launch, 1000);
     });
 
     djiosdk.on('error', function(code) {
