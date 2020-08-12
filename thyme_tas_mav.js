@@ -369,10 +369,10 @@ function dji_handler(data) {
     params.lat = parseFloat(dji.lat) * 1E7;
     params.lon = parseFloat(dji.lon) * 1E7;
     params.alt = parseFloat(dji.alt) * 1000;
-    params.relative_alt = dji.relative_alt;
-    params.vx = dji.vx;
-    params.vy = dji.vy;
-    params.vz = dji.vz;
+    params.relative_alt = parseFloat(dji.relative_alt) * 1000;
+    params.vx = parseFloat(dji.vx) * 100;
+    params.vy = parseFloat(dji.vy) * 100;
+    params.vz = parseFloat(dji.vz) * 100;
     params.hdg = 0;
     setTimeout(sendDroneMessage, 1, mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT, params);
 
