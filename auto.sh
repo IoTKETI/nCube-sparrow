@@ -1,7 +1,7 @@
 #!/bin/sh
 
-sudo chmod 777 /home/pi/nCube-sparrow-dji/
-cd /home/pi/nCube-sparrow-dji
+sudo chmod 777 /home/pi/nCube-sparrow/
+cd /home/pi/nCube-sparrow
 #git reset --hard HEAD
 #git pull
 #sleep 3
