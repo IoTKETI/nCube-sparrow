@@ -47,8 +47,10 @@ function dji_sdk_launch() {
     });
 }
 
-if (drone_type == 'dji'){
+if (drone_type == 'dji') {
     dji_sdk_launch();
 }
+else if (drone_type =='pixhawk') {
 
+}
 
