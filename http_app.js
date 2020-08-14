@@ -320,6 +320,10 @@ function retrieve_my_cnt_name(callback) {
                 my_drone_type = 'pixhawk';
             }
 
+            var drone_type = {};
+            drone_type.type = my_drone_type;
+            fs.writeFileSync('drone_type.json', JSON.stringify(drone_type, null, 4), 'utf8');
+
             if(drone_info.hasOwnProperty('secure')) {
                 my_secure = drone_info.secure;
             }
