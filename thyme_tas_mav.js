@@ -94,7 +94,7 @@ exports.ready = function tas_ready() {
                     console.log('close');
                     //displayMsg('DJI Port Closed.');
 
-                    setTimeout(dji_sdk_launch, 1000);
+                    // setTimeout(dji_sdk_launch, 1000);
                 });
 
                 socket.on('error', function (e) {
@@ -107,7 +107,7 @@ exports.ready = function tas_ready() {
         _server.listen(conf.ae.tas_mav_port, function () {
             console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
 			//displayMsg('TCP Server is listening...');
-            setTimeout(dji_sdk_launch, 1000);
+            // setTimeout(dji_sdk_launch, 1000);
         });
     }
     else if(my_drone_type === 'pixhawk') {
@@ -121,34 +121,34 @@ exports.ready = function tas_ready() {
     ltePortOpening();
 };
 
-var spawn = require('child_process').spawn;
-var djiosdk = null;
-
-function dji_sdk_launch() {
-    djiosdk = spawn('./djiosdk-Mobius', ['UserConfig.txt']);
-
-    djiosdk.stdout.on('data', function(data) {
-        console.log('stdout: ' + data);
-    });
-
-    djiosdk.stderr.on('data', function(data) {
-        console.log('stderr: ' + data);
-
-        //setTimeout(dji_sdk_launch, 1500);
-    });
-
-    djiosdk.on('exit', function(code) {
-        console.log('exit: ' + code);
-
-        setTimeout(dji_sdk_launch, 1000);
-    });
-
-    djiosdk.on('error', function(code) {
-        console.log('error: ' + code);
-
-        //setTimeout(dji_sdk_launch, 1000);
-    });
-}
+// var spawn = require('child_process').spawn;
+// var djiosdk = null;
+//
+// function dji_sdk_launch() {
+//     djiosdk = spawn('./djiosdk-Mobius', ['UserConfig.txt']);
+//
+//     djiosdk.stdout.on('data', function(data) {
+//         console.log('stdout: ' + data);
+//     });
+//
+//     djiosdk.stderr.on('data', function(data) {
+//         console.log('stderr: ' + data);
+//
+//         //setTimeout(dji_sdk_launch, 1500);
+//     });
+//
+//     djiosdk.on('exit', function(code) {
+//         console.log('exit: ' + code);
+//
+//         setTimeout(dji_sdk_launch, 1000);
+//     });
+//
+//     djiosdk.on('error', function(code) {
+//         console.log('error: ' + code);
+//
+//         //setTimeout(dji_sdk_launch, 1000);
+//     });
+// }
 
 
 var aggr_content = {};

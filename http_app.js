@@ -26,7 +26,8 @@ global.sh_adn = require('./http_adn');
 var noti = require('./noti');
 var tas_mav = require('./thyme_tas_mav');
 var tas_sec = require('./thyme_tas_sec');
-var tas_mission = require('./thyme_tas_mission');
+// var tas_mission = require('./thyme_tas_mission');
+// var tas_dji = require('./thyme_tas_dji');
 
 
 var HTTP_SUBSCRIPTION_ENABLE = 0;
@@ -460,7 +461,8 @@ function http_watchdog() {
 
                     tas_mav.ready();
                     tas_sec.ready();
-                    tas_mission.ready();
+                    //tas_mission.ready();
+                    //tas_dji.ready();
 
                     setTimeout(http_watchdog, normal_interval);
                 }
