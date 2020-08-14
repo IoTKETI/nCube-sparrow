@@ -13,6 +13,7 @@
  */
 
     // for TAS
+var fs = require('fs');
 var spawn = require('child_process').spawn;
 var djiosdk = null;
 
