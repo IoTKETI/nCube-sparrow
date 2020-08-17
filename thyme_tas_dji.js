@@ -18,8 +18,13 @@ var spawn = require('child_process').spawn;
 var djiosdk = null;
 
 var drone_type = {};
-drone_type = JSON.parse(fs.readFileSync('drone_type.json', 'utf8'));
-
+try {
+    drone_type = JSON.parse(fs.readFileSync('drone_type.json', 'utf8'));
+}
+catch (e) {
+    drone_type.type = 'pixhawk';
+    fs.writeFileSync('drone_type.json', JSON.stringify(drone_type, null, 4), 'utf8');
+}
 
 function dji_sdk_launch() {
     djiosdk = spawn('./djiosdk-Mobius', ['UserConfig.txt']);
@@ -50,7 +55,9 @@ function dji_sdk_launch() {
 if (drone_type.type == 'dji') {
     dji_sdk_launch();
 }
-else if (drone_type.type =='pixhawk') {
-
+else {
+    setInterval(function () {
+        console.log('>>>>>>>>>>>>>>>> Idle loop <<<<<<<<<<<<<<<<');
+    }, (1000 * 60 * 60));
 }
 
