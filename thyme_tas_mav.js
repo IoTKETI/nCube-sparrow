@@ -102,18 +102,21 @@ exports.ready = function tas_ready() {
                     //displayMsg('DJI Port Error: ' + e);
                 });
             });
-        }
 
-        _server.listen(conf.ae.tas_mav_port, function () {
-            console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
-			//displayMsg('TCP Server is listening...');
-            // setTimeout(dji_sdk_launch, 1000);
-        });
+            _server.listen(conf.ae.tas_mav_port, function () {
+                console.log('TCP Server (' + ip.address() + ') for TAS is listening on port ' + conf.ae.tas_mav_port);
+                //displayMsg('TCP Server is listening...');
+                // setTimeout(dji_sdk_launch, 1500);
+            });
+        }
     }
     else if(my_drone_type === 'pixhawk') {
         mavPortNum = '/dev/ttyAMA0';
         mavBaudrate = '57600';
         mavPortOpening();
+    }
+    else {
+
     }
 
     ltePortNum = '/dev/ttyUSB1';
@@ -406,10 +409,6 @@ exports.noti = function (path_arr, cinObj, socket) {
     }
 };
 
-function dji_command_one_more(message) {
-    socket_mav.write(message);
-}
-
 exports.gcs_noti_handler = function (message) {
     if(my_drone_type === 'dji') {
         var com_msg = message.toString();
@@ -418,10 +417,6 @@ exports.gcs_noti_handler = function (message) {
 
         if (msg_command == 't' || msg_command == 'h' || msg_command == 'l') {
             socket_mav.write(message);
-            //setTimeout(dji_command_one_more, 1000, message);
-
-//            oled.setCursor(0,20);
-//            oled.writeString(font, 1, msg_command + ':', 1, true);
         }
         else if (msg_command == 'g') {
             if(com_message.length < 5) {
@@ -431,33 +426,24 @@ exports.gcs_noti_handler = function (message) {
                 message = Buffer.from(com_msg);
             }
             socket_mav.write(message);
-            //setTimeout(dji_command_one_more, 1000, message);
 
             var msg_lat = com_message[1].substring(0,7);
             var msg_lon = com_message[2].substring(0,7);
             var msg_alt = com_message[3].substring(0,3);
-//            oled.setCursor(0,20);
-//            oled.writeString(font, 1, msg_command+':'+msg_lat+':'+msg_lon+':'+msg_alt, 1, true);
         }
         else if (msg_command == 'm'|| msg_command == 'a') {
             socket_mav.write(message);
-            //setTimeout(dji_command_one_more, 1000, message);
-
-//            oled.setCursor(0,20);
-//            oled.writeString(font, 1, com_msg, 1, true);
         }
     }
     else if(my_drone_type === 'pixhawk') {
         if (mavPort != null) {
             if (mavPort.isOpen) {
                 mavPort.write(message);
-                // oled.setCursor(0,20);
-                // oled.writeString(font, 1, '                     ', 1, true);
-//                oled.setCursor(0,20);
-//                oled.writeString(font, 1, message, 1, true);
-                //displayMsg('pixhawk Mission : ' + message);
             }
         }
+    }
+    else {
+
     }
 };
 
@@ -486,28 +472,22 @@ function mavPortOpening() {
 
 function mavPortOpen() {
     console.log('mavPort open. ' + mavPortNum + ' Data rate: ' + mavBaudrate);
-//    oled.setCursor(42,0);
-//    oled.writeString(font, 1, mavPortNum.substring(4,12) + '/' + mavBaudrate, 1, false);
-    // displayMsg(mavPortNum + ', ' + mavBaudrate);
-
 }
 
 function mavPortClose() {
     console.log('mavPort closed.');
-	// displayMsg('Pixhawk Port Closed.');
+
     setTimeout(mavPortOpening, 2000);
 }
 
 function mavPortError(error) {
     var error_str = error.toString();
     console.log('[mavPort error]: ' + error.message);
-    // displayMsg('[mavPort error]: ' + error.message);
     if (error_str.substring(0, 14) == "Error: Opening") {
 
     }
     else {
-        console.log('Pixhawk Port error : ' + error);
-        // displayMsg('Pixhawk Port Error: ' + error);
+        console.log('mavPort error : ' + error);
     }
 
     setTimeout(mavPortOpening, 2000);
@@ -763,17 +743,6 @@ function parseMav(mavPacket) {
         if(hb.HEARTBEAT.base_mode & 0x80) {
             if(flag_base_mode == 0) {
                 flag_base_mode = 1;
-
-                // my_sortie_name = 'disarm';
-                // my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;
-                // sh_adn.del_resource(my_cnt_name+'?rcn=0', function () {
-                //     console.log('delete container named disarm')
-                // });
-
-                //lte_mission_name = lte_parent_mission_name + '/' + my_sortie_name;
-                // sh_adn.del_resource(lte_mission_name+'?rcn=0', function () {
-                //     console.log('delete container named disarm')
-                // });
 
                 my_sortie_name = moment().format('YYYY_MM_DD_T_HH_mm');
                 my_cnt_name = my_parent_cnt_name + '/' + my_sortie_name;

@@ -25,7 +25,7 @@ var moment = require('moment');
 global.sh_adn = require('./http_adn');
 var noti = require('./noti');
 var tas_mav = require('./thyme_tas_mav');
-var tas_sec = require('./thyme_tas_sec');
+//var tas_sec = require('./thyme_tas_sec');
 // var tas_mission = require('./thyme_tas_mission');
 // var tas_dji = require('./thyme_tas_dji');
 
@@ -286,6 +286,12 @@ function retrieve_my_cnt_name(callback) {
             info.name = 'disarm';
             conf.cnt.push(JSON.parse(JSON.stringify(info)));
 
+            if(drone_info.hasOwnProperty('host')) {
+                conf.cse.host = drone_info.host;
+            }
+
+            console.log("gcs host is " + conf.cse.host);
+
             if(drone_info.hasOwnProperty('mission')) {
                 info.parent = '/Mobius/' + drone_info.gcs + '/Mission_Data/' + drone_info.drone;
                 info.name = drone_info.mission;
@@ -339,7 +345,7 @@ function retrieve_my_cnt_name(callback) {
 
             gcs_noti_topic = '/Mobius/' + my_gcs_name + '/GCS_Data/' + drone_info.drone;
             MQTT_SUBSCRIPTION_ENABLE = 1;
-            sh_state = 'crtct';
+            sh_state = 'crtae';
             setTimeout(http_watchdog, normal_interval);
             callback();
         }
@@ -352,7 +358,12 @@ function retrieve_my_cnt_name(callback) {
 }
 
 function http_watchdog() {
-    if (sh_state === 'crtae') {
+    if(sh_state === 'rtvct') {
+        retrieve_my_cnt_name(function () {
+
+        });
+    }
+    else if (sh_state === 'crtae') {
         console.log('[sh_state] : ' + sh_state);
         sh_adn.crtae(conf.ae.parent, conf.ae.name, conf.ae.appid, function (status, res_body) {
             console.log(res_body);
@@ -393,7 +404,7 @@ function http_watchdog() {
                     console.log('AE-ID created is ' + aeid + ' not equal to device AE-ID is ' + conf.ae.id);
                 }
                 else {
-                    sh_state = 'rtvct';
+                    sh_state = 'crtct';
                     request_count = 0;
                     return_count = 0;
 
@@ -404,11 +415,6 @@ function http_watchdog() {
                 console.log('x-m2m-rsc : ' + status + ' <----');
                 setTimeout(http_watchdog, retry_interval);
             }
-        });
-    }
-    else if(sh_state === 'rtvct') {
-        retrieve_my_cnt_name(function () {
-
         });
     }
     else if (sh_state === 'crtct') {
@@ -464,7 +470,7 @@ function http_watchdog() {
                     ready_for_notification();
 
                     tas_mav.ready();
-                    tas_sec.ready();
+                    //tas_sec.ready();
                     //tas_mission.ready();
                     //tas_dji.ready();
 
@@ -526,36 +532,44 @@ function mqtt_connect(serverip, gcs_noti_topic, noti_topic) {
         }
 
         mqtt_client = mqtt.connect(connectOptions);
-    }
 
-    mqtt_client.on('connect', function () {
-        mqtt_client.subscribe(gcs_noti_topic);
-        console.log('[mqtt_connect] gcs_noti_topic : ' + gcs_noti_topic);
+        mqtt_client.on('connect', function () {
+            console.log('fc_mqtt is connected');
 
-        mqtt_client.subscribe(noti_topic);
-        console.log('[mqtt_connect] noti_topic : ' + noti_topic);
-    });
+            if(gcs_noti_topic != '') {
+                mqtt_client.subscribe(gcs_noti_topic, function () {
+                    console.log('[mqtt_connect] gcs_noti_topic is subscribed: ' + gcs_noti_topic);
+                });
+            }
 
-    mqtt_client.on('message', function (topic, message) {
-        if(topic == gcs_noti_topic) {
-            tas_mav.gcs_noti_handler(message);
-        }
-        else {
-            if(topic.includes('/oneM2M/req/')) {
-                var jsonObj = JSON.parse(message.toString());
+            if(noti_topic != '') {
+                mqtt_client.subscribe(noti_topic, function () {
+                    console.log('[mqtt_connect] noti_topic is subscribed:  ' + noti_topic);
+                });
+            }
+        });
 
-                if (jsonObj['m2m:rqp'] == null) {
-                    jsonObj['m2m:rqp'] = jsonObj;
-                }
-
-                noti.mqtt_noti_action(topic.split('/'), jsonObj);
+        mqtt_client.on('message', function (topic, message) {
+            if(topic == gcs_noti_topic) {
+                tas_mav.gcs_noti_handler(message);
             }
             else {
-            }
-        }
-    });
+                if(topic.includes('/oneM2M/req/')) {
+                    var jsonObj = JSON.parse(message.toString());
 
-    mqtt_client.on('error', function (err) {
-        console.log(err.message);
-    });
+                    if (jsonObj['m2m:rqp'] == null) {
+                        jsonObj['m2m:rqp'] = jsonObj;
+                    }
+
+                    noti.mqtt_noti_action(topic.split('/'), jsonObj);
+                }
+                else {
+                }
+            }
+        });
+
+        mqtt_client.on('error', function (err) {
+            console.log(err.message);
+        });
+    }
 }

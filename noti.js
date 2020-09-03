@@ -12,7 +12,7 @@
  * Created by Il Yeup, Ahn in KETI on 2016-09-21.
  */
 
-var tas_sec = require('./thyme_tas_sec');
+//var tas_sec = require('./thyme_tas_sec');
 var tas_mission = require('./thyme_tas_mission');
 
 var _this = this;
@@ -139,7 +139,7 @@ exports.mqtt_noti_action = function(topic_arr, jsonObj) {
 
                                 if (path_arr[path_arr.length - 2] === 'Res_auth') {
                                     console.log(cinObj);
-                                    tas_sec.toSecBoard(cinObj);
+                                    //tas_sec.toSecBoard(cinObj);
                                 }
                                 else if (path_arr[path_arr.length - 2] === 'micro') {
                                     console.log(cinObj);

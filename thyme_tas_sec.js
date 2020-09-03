@@ -16,12 +16,73 @@
 var net = require('net');
 var ip = require('ip');
 
-var socket_arr = {};
-exports.socket_arr = socket_arr;
+var mqtt = require('mqtt');
 
-var tas_buffer = {};
-exports.buffer = tas_buffer;
+var topic_sec_auth_start = '/MUV/req/nCube/me/auth_start';
+var topic_sec_req_auth = '/MUV/req/nCube/me/req_auth';
 
+var topic_auth_start = '/nCube/Control/Auth/start';
+var topic_req_auth = '/nCube/Control/Auth/req_auth';
+var topic_res_auth = '/nCube/Data/Auth/res_auth';
+var topic_req_enc = '/nCube/Control/Enc/req_enc';
+var topic_res_enc = '/nCube/Data/Enc/res_enc';
+var topic_req_sig = '/nCube/Control/Sig/req_sig';
+var topic_res_sig = '/nCube/Data/Sig/res_sig';
+
+var sec_mqtt_client = null;
+
+var sec_conf = {};
+sec_conf.brokerip = 'localhost';
+sec_conf.mqttport = '1883';
+
+if(sec_mqtt_client == null) {
+    var connectOptions = {
+        host: sec_conf.brokerip,
+        port: sec_conf.cse.mqttport,
+//      username: 'keti',
+//      password: 'keti123',
+        protocol: "mqtt",
+        keepalive: 10,
+//      clientId: serverUID,
+        protocolId: "MQTT",
+        protocolVersion: 4,
+        clean: true,
+        reconnectPeriod: 2000,
+        connectTimeout: 2000,
+        rejectUnauthorized: false
+    };
+
+    sec_mqtt_client = mqtt.connect(connectOptions);
+
+    sec_mqtt_client.on('connect', function () {
+        sec_mqtt_client.subscribe(topic_res_auth);
+        console.log('[mqtt_connect] topic_res_auth : ' + topic_res_auth);
+
+        sec_mqtt_client.subscribe(topic_res_enc);
+        console.log('[mqtt_connect] topic_res_enc : ' + topic_res_enc);
+
+        sec_mqtt_client.subscribe(topic_res_sig);
+        console.log('[mqtt_connect] topic_res_sig : ' + topic_res_sig);
+    });
+
+    sec_mqtt_client.on('message', function (topic, message) {
+        if(topic == topic_res_auth) {
+            sec_res_auth_handler(message);
+        }
+        else if(topic == topic_res_enc) {
+            sec_res_enc_handler(message);
+        }
+        else if(topic == topic_res_sig) {
+            sec_res_sig_handler(message);
+        }
+        else {
+        }
+    });
+
+    sec_mqtt_client.on('error', function (err) {
+        console.log(err.message);
+    });
+}
 
 var t_count = 0;
 
