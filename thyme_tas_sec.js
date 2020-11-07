@@ -160,7 +160,6 @@ function secPortError(error) {
 var secStr = [];
 var secStrPacket = '';
 
-var pre_seq = 0;
 function secPortData(data) {
     secStr += data.toString('hex');
     //console.log(secStr);

@@ -495,76 +495,126 @@ function mavPortError(error) {
 
 global.mav_ver = 1;
 
-var mavStr = [];
-var mavStrPacket = '';
+const byteToHex = [];
 
-var pre_seq = 0;
-function mavPortData(data) {
-    mavStr += data.toString('hex');
-    if(data[0] == 0xfe || data[0] == 0xfd) {
-        var mavStrArr = [];
+for (let n = 0; n <= 0xff; ++n)
+{
+    const hexOctet = n.toString(16).padStart(2, "0");
+    byteToHex.push(hexOctet);
+}
 
-        var str = '';
-        var split_idx = 0;
+function hex(arrayBuffer)
+{
+    const buff = new Uint8Array(arrayBuffer);
+    const hexOctets = []; // new Array(buff.length) is even faster (preallocates necessary array size), then use hexOctets[i] instead of .push()
 
-        mavStrArr[split_idx] = str;
-        for (var i = 0; i < mavStr.length; i+=2) {
-            str = mavStr.substr(i, 2);
+    for (let i = 0; i < buff.length; ++i)
+        hexOctets.push(byteToHex[buff[i]]);
 
-            if(mav_ver == 1) {
-                if (str == 'fe') {
-                    mavStrArr[++split_idx] = '';
-                }
+    return hexOctets.join("");
+}
+
+function extractMav(msg, mavStr, fnParse) {
+    mavStr += hex(msg);
+    while(mavStr.length > 12) {
+        var stx = mavStr.substr(0, 2);
+        if(stx === 'fe' || stx === 'fd') {
+            if (stx === 'fe') {
+                var len = parseInt(mavStr.substr(2, 2), 16);
+                var mavLength = (6 * 2) + (len * 2) + (2 * 2);
             }
-            else if(mav_ver == 2) {
-                if (str == 'fd') {
-                    mavStrArr[++split_idx] = '';
-                }
+            else { // if (stx === 'fd') {
+                len = parseInt(mavStr.substr(2, 2), 16);
+                mavLength = (10 * 2) + (len * 2) + (2 * 2);
             }
 
-            mavStrArr[split_idx] += str;
-        }
-        mavStrArr.splice(0, 1);
-
-        var mavPacket = '';
-        for (var idx in mavStrArr) {
-            if(mavStrArr.hasOwnProperty(idx)) {
-                mavPacket = mavStrPacket + mavStrArr[idx];
-
-                if(mav_ver == 1) {
-                    var refLen = (parseInt(mavPacket.substr(2, 2), 16) + 8) * 2;
-                }
-                else if(mav_ver == 2) {
-                    refLen = (parseInt(mavPacket.substr(2, 2), 16) + 12) * 2;
-                }
-
-                if(refLen == mavPacket.length) {
-                    mqtt_client.publish(my_cnt_name, Buffer.from(mavPacket, 'hex'));
-                    send_aggr_to_Mobius(my_cnt_name, mavPacket, 1500);
-                    mavStrPacket = '';
-
-                    setTimeout(parseMav, 0, mavPacket);
-                }
-                else if(refLen < mavPacket.length) {
-                    mavStrPacket = '';
-                    //console.log('                        ' + mavStrArr[idx]);
-                }
-                else {
-                    mavStrPacket = mavPacket;
-                    //console.log('                ' + mavStrPacket.length + ' - ' + mavStrPacket);
-                }
+            if (mavStr.length >= mavLength) {
+                var mavPacket = mavStr.substr(0, mavLength);
+                mavStr = mavStr.slice(mavLength);
+                setTimeout(fnParse, 0, mavPacket);
             }
-        }
-
-        if(mavStrPacket != '') {
-            mavStr = mavStrPacket;
-            mavStrPacket = '';
+            else {
+                break;
+            }
         }
         else {
-            mavStr = '';
+            mavStr = mavStr.slice(2);
         }
     }
 }
+
+var mavStr = '';
+function mavPortData(data) {
+    extractMav(data, mavStr, parseMav);
+}
+//
+// var pre_seq = 0;
+// function mavPortData(data) {
+//     mavStr += data.toString('hex');
+//     if(data[0] == 0xfe || data[0] == 0xfd) {
+//         var mavStrArr = [];
+//
+//         var str = '';
+//         var split_idx = 0;
+//
+//         mavStrArr[split_idx] = str;
+//         for (var i = 0; i < mavStr.length; i+=2) {
+//             str = mavStr.substr(i, 2);
+//
+//             if(mav_ver == 1) {
+//                 if (str == 'fe') {
+//                     mavStrArr[++split_idx] = '';
+//                 }
+//             }
+//             else if(mav_ver == 2) {
+//                 if (str == 'fd') {
+//                     mavStrArr[++split_idx] = '';
+//                 }
+//             }
+//
+//             mavStrArr[split_idx] += str;
+//         }
+//         mavStrArr.splice(0, 1);
+//
+//         var mavPacket = '';
+//         for (var idx in mavStrArr) {
+//             if(mavStrArr.hasOwnProperty(idx)) {
+//                 mavPacket = mavStrPacket + mavStrArr[idx];
+//
+//                 if(mav_ver == 1) {
+//                     var refLen = (parseInt(mavPacket.substr(2, 2), 16) + 8) * 2;
+//                 }
+//                 else if(mav_ver == 2) {
+//                     refLen = (parseInt(mavPacket.substr(2, 2), 16) + 12) * 2;
+//                 }
+//
+//                 if(refLen == mavPacket.length) {
+//                     mqtt_client.publish(my_cnt_name, Buffer.from(mavPacket, 'hex'));
+//                     send_aggr_to_Mobius(my_cnt_name, mavPacket, 1500);
+//                     mavStrPacket = '';
+//
+//                     setTimeout(parseMav, 0, mavPacket);
+//                 }
+//                 else if(refLen < mavPacket.length) {
+//                     mavStrPacket = '';
+//                     //console.log('                        ' + mavStrArr[idx]);
+//                 }
+//                 else {
+//                     mavStrPacket = mavPacket;
+//                     //console.log('                ' + mavStrPacket.length + ' - ' + mavStrPacket);
+//                 }
+//             }
+//         }
+//
+//         if(mavStrPacket != '') {
+//             mavStr = mavStrPacket;
+//             mavStrPacket = '';
+//         }
+//         else {
+//             mavStr = '';
+//         }
+//     }
+// }
 
 var gpi = {};
 gpi.GLOBAL_POSITION_INT = {};
@@ -585,30 +635,10 @@ function parseMav(mavPacket) {
         msgid = mavPacket.substr(10, 2).toLowerCase();
     }
 
-    var cur_seq = parseInt(mavPacket.substr(4, 2), 16);
+    var sys_id = parseInt(sysid, 16);
+    var msg_id = parseInt(msgid, 16);
 
-    if(pre_seq == cur_seq) {
-        //console.log('        ' + pre_seq + ' - ' + cur_seq + ' - ' + mavPacket);
-    }
-    else {
-        //console.log('        ' + pre_seq + ' - ' + cur_seq + ' - ' + mavPacket;
-    }
-    pre_seq = (cur_seq + 1) % 256;
-
-    // if(sysid == '37' ) {
-    //     console.log('55 - ' + content_each);
-    // }
-    // else if(sysid == '0a' ) {
-    //     console.log('10 - ' + content_each);
-    // }
-    // else if(sysid == '21' ) {
-    //     console.log('33 - ' + content_each);
-    // }
-    // else if(sysid == 'ff' ) {
-    //     console.log('255 - ' + content_each);
-    // }
-
-    if (msgid == '21') { // #33
+    if (msg_id == mavlink.MAVLINK_MSG_ID_GLOBAL_POSITION_INT) {
         if(authResult == 'done') {
             if (secPort.isOpen) {
                 var len = mavPacket.length/2;
@@ -662,7 +692,7 @@ function parseMav(mavPacket) {
         //console.log(gpi);
     }
 
-    else if (msgid == '4c') { // #76 : COMMAND_LONG
+    else if (msg_id == mavlink.MAVLINK_MSG_ID_COMMAND_LONG) { // #76 : COMMAND_LONG
         // if(authResult == 'done') {
         //     if (secPort.isOpen) {
         //         len = parseInt(mavPacket.substr(2, 2), 16);
@@ -683,7 +713,7 @@ function parseMav(mavPacket) {
         // }
     }
 
-    else if (msgid == '00') { // #00 : HEARTBEAT
+    else if (msg_id == mavlink.MAVLINK_MSG_ID_HEARTBEAT) { // #00 : HEARTBEAT
         if(authResult == 'done') {
             if (secPort.isOpen) {
                 len = mavPacket.length/2;
