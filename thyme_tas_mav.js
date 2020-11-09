@@ -545,8 +545,32 @@ function extractMav(fnParse) {
 var mavStr = '';
 function mavPortData(data) {
     mavStr += hex(data);
-    
-    extractMav(parseMav);
+
+    while(mavStr.length > 12) {
+        var stx = mavStr.substr(0, 2);
+        if(stx === 'fe') {
+            if (stx === 'fe') {
+                var len = parseInt(mavStr.substr(2, 2), 16);
+                var mavLength = (6 * 2) + (len * 2) + (2 * 2);
+            }
+            else { // if (stx === 'fd') {
+                len = parseInt(mavStr.substr(2, 2), 16);
+                mavLength = (10 * 2) + (len * 2) + (2 * 2);
+            }
+
+            if (mavStr.length >= mavLength) {
+                var mavPacket = mavStr.substr(0, mavLength);
+                mavStr = mavStr.substr(mavLength);
+                setTimeout(parseMav, 0, mavPacket);
+            }
+            else {
+                break;
+            }
+        }
+        else {
+            mavStr = mavStr.substr(2);
+        }
+    }
 }
 //
 // var pre_seq = 0;
