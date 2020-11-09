@@ -560,6 +560,9 @@ function mavPortData(data) {
 
             if (mavStr.length >= mavLength) {
                 var mavPacket = mavStr.substr(0, mavLength);
+                mqtt_client.publish(my_cnt_name, Buffer.from(mavPacket, 'hex'));
+                send_aggr_to_Mobius(my_cnt_name, mavPacket, 1500);
+
                 mavStr = mavStr.substr(mavLength);
                 setTimeout(parseMav, 0, mavPacket);
             }
