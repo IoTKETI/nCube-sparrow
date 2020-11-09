@@ -111,7 +111,7 @@ exports.ready = function tas_ready() {
         }
     }
     else if(my_drone_type === 'pixhawk') {
-        mavPortNum = '/dev/ttyAMA0';
+        mavPortNum = '/dev/ttyUSB3';
         mavBaudrate = '57600';
         mavPortOpening();
     }
@@ -514,11 +514,10 @@ function hex(arrayBuffer)
     return hexOctets.join("");
 }
 
-function extractMav(msg, mavStr, fnParse) {
-    mavStr += hex(msg);
+function extractMav(fnParse) {
     while(mavStr.length > 12) {
         var stx = mavStr.substr(0, 2);
-        if(stx === 'fe' || stx === 'fd') {
+        if(stx === 'fe') {
             if (stx === 'fe') {
                 var len = parseInt(mavStr.substr(2, 2), 16);
                 var mavLength = (6 * 2) + (len * 2) + (2 * 2);
@@ -530,22 +529,24 @@ function extractMav(msg, mavStr, fnParse) {
 
             if (mavStr.length >= mavLength) {
                 var mavPacket = mavStr.substr(0, mavLength);
-                mavStr = mavStr.slice(mavLength);
+                mavStr = mavStr.substr(mavLength);
                 setTimeout(fnParse, 0, mavPacket);
-            }
+            } 
             else {
                 break;
             }
         }
         else {
-            mavStr = mavStr.slice(2);
+            mavStr = mavStr.substr(2);
         }
     }
 }
 
 var mavStr = '';
 function mavPortData(data) {
-    extractMav(data, mavStr, parseMav);
+    mavStr += hex(data);
+    
+    extractMav(parseMav);
 }
 //
 // var pre_seq = 0;
@@ -583,7 +584,7 @@ function mavPortData(data) {
 //
 //                 if(mav_ver == 1) {
 //                     var refLen = (parseInt(mavPacket.substr(2, 2), 16) + 8) * 2;
-//                 }
+//                 }tty
 //                 else if(mav_ver == 2) {
 //                     refLen = (parseInt(mavPacket.substr(2, 2), 16) + 12) * 2;
 //                 }
@@ -682,7 +683,7 @@ function parseMav(mavPacket) {
             base_offset += 8;
             relative_alt = mavPacket.substr(base_offset, 8).toLowerCase();
         }
-
+        
         gpi.GLOBAL_POSITION_INT.time_boot_ms = Buffer.from(time_boot_ms, 'hex').readUInt32LE(0);
         gpi.GLOBAL_POSITION_INT.lat = Buffer.from(lat, 'hex').readInt32LE(0);
         gpi.GLOBAL_POSITION_INT.lon = Buffer.from(lon, 'hex').readInt32LE(0);
@@ -762,7 +763,6 @@ function parseMav(mavPacket) {
             mavlink_version = mavPacket.substr(base_offset, 2).toLowerCase();
         }
 
-        //console.log(mavPacket);
         hb.HEARTBEAT.type = Buffer.from(type, 'hex').readUInt8(0);
         hb.HEARTBEAT.autopilot = Buffer.from(autopilot, 'hex').readUInt8(0);
         hb.HEARTBEAT.base_mode = Buffer.from(base_mode, 'hex').readUInt8(0);
@@ -770,7 +770,7 @@ function parseMav(mavPacket) {
         hb.HEARTBEAT.system_status = Buffer.from(system_status, 'hex').readUInt8(0);
         hb.HEARTBEAT.mavlink_version = Buffer.from(mavlink_version, 'hex').readUInt8(0);
 
-        if(hb.HEARTBEAT.base_mode & 0x80) {
+        if(hb.HEARTBEAT.base_mode & 0x80) { 
             if(flag_base_mode == 0) {
                 flag_base_mode = 1;
 
